@@ -130,6 +130,7 @@ export interface Project {
 
 export interface Member {
   id: number;
+  userId: number;
   name: string;
   contact?: string | null;
   githubUsername?: string | null;
@@ -140,6 +141,7 @@ export interface Member {
   remark?: string | null;
   createdAt: string;
   updatedAt: string;
+  user?: User | null;
 }
 
 export interface ProjectMember {
@@ -168,18 +170,6 @@ export interface User {
   skillDirection?: string | null;
   skillLevel?: string | null;
   remark?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface ProjectUser {
-  id: number;
-  projectId: number;
-  userId: number;
-  responsibility?: string | null;
-  status: "ACTIVE" | "REMOVED";
-  assignedAt?: string | null;
-  removedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -250,6 +240,9 @@ export interface DashboardSummary {
   doneTaskTotal: number;
   pendingSubmissionTaskTotal: number;
   submittedTaskTotal: number;
+  requirementTotal: number;
+  openRequirementTotal: number;
+  claimedRequirementTotal: number;
   averageProjectProgress: number;
 }
 

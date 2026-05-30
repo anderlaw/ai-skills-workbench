@@ -46,11 +46,25 @@ def test_business_reads_and_writes_require_login(client):
 
 def test_project_member_task_audit_dashboard_flow(client):
     headers = auth_headers(client)
+    user_response = client.post(
+        "/api/v1/users",
+        headers=headers,
+        json={
+            "username": "zhangsan",
+            "password": "zhangsan-pass",
+            "displayName": "张三",
+            "roleCodes": ["CONTRIBUTOR"],
+            "status": "ACTIVE",
+        },
+    )
+    assert user_response.status_code == 201
+    user = user_response.json()
 
     member_response = client.post(
         "/api/v1/members",
         headers=headers,
         json={
+            "userId": user["id"],
             "name": "张三",
             "contact": "wechat-zhangsan",
             "githubUsername": "zhangsan",
@@ -158,6 +172,7 @@ def test_project_member_task_audit_dashboard_flow(client):
     assert dashboard["projectTotal"] == 1
     assert dashboard["memberTotal"] == 1
     assert dashboard["taskTotal"] == 1
+    assert dashboard["requirementTotal"] == 0
     assert dashboard["submittedTaskTotal"] == 1
 
     audit_logs = client.get("/api/v1/audit-logs", headers=headers).json()

@@ -8,7 +8,8 @@ from app.api.deps import db_session, has_permission, require_actor
 from app.api.utils import create_audit_log, get_or_404, model_to_dict, update_model
 from app.core.errors import ApiError
 from app.core.security import Actor
-from app.models.project_user import ProjectUser
+from app.models.member import Member
+from app.models.project_member import ProjectMember
 from app.models.requirement import Requirement
 from app.schemas.base import AuditAction, TargetType
 from app.schemas.requirement import RequirementRead, RequirementUpdate
@@ -114,10 +115,13 @@ def ensure_can_modify_requirement(db: Session, actor: Actor, requirement: Requir
 
 def ensure_project_assignment(db: Session, user_id: int, project_id: int) -> None:
     assignment = db.scalar(
-        select(ProjectUser).where(
-            ProjectUser.project_id == project_id,
-            ProjectUser.user_id == user_id,
-            ProjectUser.status == "ACTIVE",
+        select(ProjectMember)
+        .join(Member, Member.id == ProjectMember.member_id)
+        .where(
+            ProjectMember.project_id == project_id,
+            ProjectMember.status == "ACTIVE",
+            Member.user_id == user_id,
+            Member.status == "ACTIVE",
         )
     )
     if assignment is None:

@@ -3,8 +3,8 @@ import { UserMinus, UserPlus } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { assignProjectUser, getProjectUsers, getProjects, removeProjectUser } from "../../api/projectApi";
-import { getUsers } from "../../api/userApi";
+import { addProjectMember, getProjectMembers, getProjects, removeProjectMember } from "../../api/projectApi";
+import { getMembers } from "../../api/memberApi";
 import { errorMessage } from "../../api/http";
 import { EmptyState } from "../../components/common/EmptyState";
 import { PageHeader } from "../../components/common/PageHeader";
@@ -18,29 +18,29 @@ export function ProjectAssignmentPage() {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const projects = useQuery({ queryKey: ["projects", "assignment"], queryFn: () => getProjects({ pageSize: 100 }), enabled: isAdmin });
-  const users = useQuery({ queryKey: ["users"], queryFn: () => getUsers({ pageSize: 100 }), enabled: isAdmin });
+  const members = useQuery({ queryKey: ["members"], queryFn: () => getMembers({ pageSize: 100 }), enabled: isAdmin });
   const [projectId, setProjectId] = useState<number | null>(null);
   const selectedProjectId = projectId ?? projects.data?.items[0]?.id ?? null;
-  const projectUsers = useQuery({
-    queryKey: ["project-users", selectedProjectId],
-    queryFn: () => getProjectUsers(selectedProjectId!),
+  const projectMembers = useQuery({
+    queryKey: ["project-members", selectedProjectId],
+    queryFn: () => getProjectMembers(selectedProjectId!),
     enabled: isAdmin && Boolean(selectedProjectId)
   });
-  const userById = useMemo(() => new Map((users.data?.items ?? []).map((user) => [user.id, user])), [users.data?.items]);
+  const memberById = useMemo(() => new Map((members.data?.items ?? []).map((member) => [member.id, member])), [members.data?.items]);
   const selectedProject = projects.data?.items.find((project) => project.id === selectedProjectId);
-  const activeAssignments = projectUsers.data?.items.filter((item) => item.status === "ACTIVE") ?? [];
+  const activeAssignments = projectMembers.data?.items.filter((item) => item.status === "ACTIVE") ?? [];
 
   const assignMutation = useMutation({
-    mutationFn: (payload: { userId: number; responsibility?: string }) => assignProjectUser(selectedProjectId!, payload),
+    mutationFn: (payload: { memberId: number; role: string; responsibility?: string }) => addProjectMember(selectedProjectId!, payload),
     onSuccess: invalidateAssignments
   });
   const removeMutation = useMutation({
-    mutationFn: (userId: number) => removeProjectUser(selectedProjectId!, userId),
+    mutationFn: (memberId: number) => removeProjectMember(selectedProjectId!, memberId),
     onSuccess: invalidateAssignments
   });
 
   async function invalidateAssignments() {
-    await queryClient.invalidateQueries({ queryKey: ["project-users", selectedProjectId] });
+    await queryClient.invalidateQueries({ queryKey: ["project-members", selectedProjectId] });
     await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
   }
 
@@ -52,7 +52,8 @@ export function ProjectAssignmentPage() {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     assignMutation.mutate({
-      userId: Number(form.get("userId")),
+      memberId: Number(form.get("memberId")),
+      role: String(form.get("role") ?? "OTHER"),
       responsibility: String(form.get("responsibility") ?? "")
     });
     event.currentTarget.reset();
@@ -60,7 +61,7 @@ export function ProjectAssignmentPage() {
 
   return (
     <>
-      <PageHeader title="项目分配" description="集中维护系统用户与项目的分配关系，分配后贡献者才能在项目需求池中写入。" />
+      <PageHeader title="项目分配" description="集中维护项目人员与项目的分配关系，项目人员已绑定登录账号后才能参与需求池写入。" />
       <div className="grid gap-5 xl:grid-cols-[420px_1fr]">
         <Card>
           <CardHeader className="font-semibold">选择项目</CardHeader>
@@ -91,7 +92,7 @@ export function ProjectAssignmentPage() {
         <Card>
           <CardHeader className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div>
-              <div className="font-semibold">分配用户</div>
+              <div className="font-semibold">分配项目人员</div>
               <div className="mt-1 text-sm text-muted-foreground">{selectedProject ? `当前项目：${selectedProject.name}` : "请选择项目"}</div>
             </div>
             {selectedProject ? <Link className="surface-link text-sm" to={`/projects/${selectedProject.id}`}>查看项目详情</Link> : null}
@@ -103,10 +104,20 @@ export function ProjectAssignmentPage() {
               </div>
             ) : null}
             {selectedProjectId ? (
-              <form className="grid gap-3 rounded-lg border border-teal-100 bg-teal-50/40 p-4 md:grid-cols-[1fr_1fr_auto]" onSubmit={handleSubmit}>
-                <Select name="userId" required>
-                  <option value="">选择用户</option>
-                  {users.data?.items.map((user) => <option key={user.id} value={user.id}>{user.displayName}（{user.username}）</option>)}
+              <form className="grid gap-3 rounded-lg border border-teal-100 bg-teal-50/40 p-4 md:grid-cols-[1fr_150px_1fr_auto]" onSubmit={handleSubmit}>
+                <Select name="memberId" required>
+                  <option value="">选择项目人员</option>
+                  {members.data?.items.map((member) => <option key={member.id} value={member.id}>{member.name}（{member.user?.username ?? `用户 #${member.userId}`}）</option>)}
+                </Select>
+                <Select name="role" defaultValue="OTHER">
+                  <option value="OWNER">负责人</option>
+                  <option value="FRONTEND">前端</option>
+                  <option value="BACKEND">后端</option>
+                  <option value="FULLSTACK">全栈</option>
+                  <option value="AI">AI</option>
+                  <option value="TEST">测试</option>
+                  <option value="DEPLOY">部署</option>
+                  <option value="OTHER">其他</option>
                 </Select>
                 <Input name="responsibility" placeholder="项目内职责" />
                 <Button type="submit" disabled={assignMutation.isPending}>
@@ -119,14 +130,14 @@ export function ProjectAssignmentPage() {
             {activeAssignments.length ? (
               <div className="grid gap-3">
                 {activeAssignments.map((assignment) => {
-                  const assignedUser = userById.get(assignment.userId);
+                  const assignedMember = assignment.member ?? memberById.get(assignment.memberId);
                   return (
                     <div key={assignment.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm shadow-sm">
                       <div className="min-w-0">
-                        <div className="truncate font-semibold">{assignedUser ? `${assignedUser.displayName}（${assignedUser.username}）` : `用户 #${assignment.userId}`}</div>
+                        <div className="truncate font-semibold">{assignedMember ? `${assignedMember.name}（${assignedMember.user?.username ?? `用户 #${assignedMember.userId}`}）` : `人员 #${assignment.memberId}`}</div>
                         <div className="mt-1 text-muted-foreground">{assignment.responsibility || "未填写职责"}</div>
                       </div>
-                      <Button type="button" variant="ghost" onClick={() => removeMutation.mutate(assignment.userId)} disabled={removeMutation.isPending}>
+                      <Button type="button" variant="ghost" onClick={() => removeMutation.mutate(assignment.memberId)} disabled={removeMutation.isPending}>
                         <UserMinus size={15} />
                         移除
                       </Button>
@@ -135,7 +146,7 @@ export function ProjectAssignmentPage() {
                 })}
               </div>
             ) : (
-              <EmptyState text="该项目暂无分配用户" />
+              <EmptyState text="该项目暂无分配项目人员" />
             )}
           </CardContent>
         </Card>

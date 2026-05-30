@@ -2,12 +2,13 @@ from sqlalchemy import String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base_class import Base
-from app.models.base import IdMixin, TimestampMixin
+from app.models.base import ID_TYPE, IdMixin, TimestampMixin
 
 
 class Member(IdMixin, TimestampMixin, Base):
     __tablename__ = "members"
 
+    user_id: Mapped[int] = mapped_column(ID_TYPE, nullable=False, unique=True, index=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
     contact: Mapped[str | None] = mapped_column(String(200))
     github_username: Mapped[str | None] = mapped_column(String(120), index=True)
@@ -16,6 +17,12 @@ class Member(IdMixin, TimestampMixin, Base):
     skill_level: Mapped[str | None] = mapped_column(String(40))
     status: Mapped[str] = mapped_column(String(40), default="ACTIVE", nullable=False, index=True)
     remark: Mapped[str | None] = mapped_column(Text)
+
+    user = relationship(
+        "User",
+        primaryjoin="User.id == foreign(Member.user_id)",
+        viewonly=True,
+    )
 
     projects = relationship(
         "ProjectMember",

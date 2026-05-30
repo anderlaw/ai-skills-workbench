@@ -3,7 +3,6 @@ from app.models.member import Member
 from app.models.permission_node import PermissionNode
 from app.models.project import Project
 from app.models.project_member import ProjectMember
-from app.models.project_user import ProjectUser
 from app.models.requirement import Requirement
 from app.models.role import Role
 from app.models.role_permission_node import RolePermissionNode
@@ -17,7 +16,6 @@ __all__ = [
     "PermissionNode",
     "Project",
     "ProjectMember",
-    "ProjectUser",
     "Requirement",
     "Role",
     "RolePermissionNode",

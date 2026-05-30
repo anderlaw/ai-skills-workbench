@@ -17,22 +17,23 @@ export function MemberListPage() {
   return (
     <>
       <PageHeader
-        title="成员"
-        description="记录参与项目的人、技术方向、状态和联系方式。"
-        actions={isAdmin ? <Link to="/members/new"><Button><Plus size={16} />新增成员</Button></Link> : null}
+        title="项目人员"
+        description="记录参与项目的人、绑定账号、技术方向、状态和联系方式。"
+        actions={isAdmin ? <Link to="/members/new"><Button><Plus size={16} />新增项目人员</Button></Link> : null}
       />
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-3">
           <div>
-            <div className="font-semibold">成员目录</div>
-            <div className="mt-1 text-sm text-muted-foreground">共 {members.data?.total ?? "-"} 位成员</div>
+            <div className="font-semibold">项目人员目录</div>
+            <div className="mt-1 text-sm text-muted-foreground">共 {members.data?.total ?? "-"} 位项目人员</div>
           </div>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           <table className="data-table min-w-[760px]">
             <thead>
               <tr>
-                <th>成员</th>
+                <th>项目人员</th>
+                <th>绑定账号</th>
                 <th>技术方向</th>
                 <th>技术水平</th>
                 <th>GitHub</th>
@@ -47,6 +48,7 @@ export function MemberListPage() {
                     <Link className="surface-link" to={`/members/${member.id}`}>{member.name}</Link>
                     <div className="mt-1 text-xs text-muted-foreground">{member.contact ?? member.email ?? "-"}</div>
                   </td>
+                  <td>{member.user ? `${member.user.displayName}（${member.user.username}）` : `用户 #${member.userId}`}</td>
                   <td>{member.skillDirection ?? "-"}</td>
                   <td>{member.skillLevel ?? "-"}</td>
                   <td>{member.githubUsername ?? "-"}</td>

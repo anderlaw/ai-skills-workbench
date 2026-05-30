@@ -1,19 +1,17 @@
-import { Activity, AlertTriangle, Clock, FolderKanban, Users } from "lucide-react";
+import { Activity, Clock, FolderKanban, Lightbulb, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
 import {
-  getBlockedTasks,
   getDashboardSummary,
-  getPendingTasks,
   getRecentAuditLogs,
   getRecentProjects,
 } from "../../api/dashboardApi";
 import { EmptyState } from "../../components/common/EmptyState";
 import { PageHeader } from "../../components/common/PageHeader";
 import { ProgressBar } from "../../components/common/ProgressBar";
-import { StatCard } from "../../components/common/StatCard";
-import { ProjectStatusBadge, TaskStatusBadge } from "../../components/common/StatusBadges";
+import { ProjectStatusBadge } from "../../components/common/StatusBadges";
 import { Card, CardContent, CardHeader } from "../../components/ui/Card";
 import { formatDateTime } from "../../lib/format";
 import type { AuditLog } from "../../types";
@@ -21,26 +19,21 @@ import type { AuditLog } from "../../types";
 export function DashboardPage() {
   const summary = useQuery({ queryKey: ["dashboard", "summary"], queryFn: getDashboardSummary });
   const recentProjects = useQuery({ queryKey: ["dashboard", "recent-projects"], queryFn: getRecentProjects });
-  const blockedTasks = useQuery({ queryKey: ["dashboard", "blocked-tasks"], queryFn: getBlockedTasks });
-  const pendingTasks = useQuery({ queryKey: ["dashboard", "pending-tasks"], queryFn: getPendingTasks });
   const recentLogs = useQuery({ queryKey: ["dashboard", "recent-audit-logs"], queryFn: getRecentAuditLogs });
 
   const data = summary.data;
   const projectActivities = (recentLogs.data?.items ?? [])
     .filter((log) => ["PROJECT", "PROJECT_MEMBER", "REQUIREMENT", "TASK"].includes(log.targetType))
     .slice(0, 6);
-  const peopleActivities = (recentLogs.data?.items ?? [])
-    .filter((log) => ["USER", "MEMBER", "PROJECT_MEMBER"].includes(log.targetType))
-    .slice(0, 6);
 
   return (
     <>
-      <PageHeader title="统计看板" description="项目、人员、任务和近期动态的整体视图。" />
+      <PageHeader title="统计看板" description="项目、项目人员、任务和需求的整体视图。" />
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="项目" value={data?.projectTotal ?? "-"} icon={<FolderKanban size={18} />} />
-        <StatCard title="人员" value={data?.memberTotal ?? "-"} icon={<Users size={18} />} />
-        <StatCard title="任务" value={data?.taskTotal ?? "-"} icon={<Activity size={18} />} />
-        <StatCard title="阻塞任务" value={data?.blockedTaskTotal ?? "-"} icon={<AlertTriangle size={18} />} />
+        <ResourceCard title="项目" value={data?.projectTotal ?? "-"} description="查看项目列表和进度" to="/projects" icon={<FolderKanban size={18} />} disabled={!data?.projectTotal} />
+        <ResourceCard title="项目人员" value={data?.memberTotal ?? "-"} description="查看项目参与人员" to="/members" icon={<Users size={18} />} disabled={!data?.memberTotal} />
+        <ResourceCard title="任务" value={data?.taskTotal ?? "-"} description="查看任务列表和负责人" to="/tasks" icon={<Activity size={18} />} disabled={!data?.taskTotal} />
+        <ResourceCard title="需求" value={data?.requirementTotal ?? "-"} description="进入项目查看需求池" to="/projects" icon={<Lightbulb size={18} />} disabled={!data?.requirementTotal} />
       </div>
 
       <div className="mt-5 grid gap-5 xl:grid-cols-[1.1fr_0.9fr]">
@@ -81,58 +74,43 @@ export function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-      <div className="mt-5 grid gap-5 xl:grid-cols-3">
-        <Card>
-          <CardHeader className="font-semibold">人员更新</CardHeader>
-          <CardContent className="grid gap-3">
-            {peopleActivities.length ? (
-              peopleActivities.map((log) => <ActivityItem key={log.id} log={log} />)
-            ) : (
-              <EmptyState text="暂无人员更新" />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="font-semibold">阻塞任务</CardHeader>
-          <CardContent className="grid gap-3">
-            {blockedTasks.data?.items.length ? (
-              blockedTasks.data.items.map((task) => (
-                <Link key={task.id} to={`/tasks/${task.id}`} className="soft-list-item grid gap-2">
-                  <div className="font-medium">{task.title}</div>
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <span>{task.project?.name ?? "-"}</span>
-                    <TaskStatusBadge status={task.status} />
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <EmptyState text="暂无阻塞任务" />
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="font-semibold">待提交任务</CardHeader>
-          <CardContent className="grid gap-3">
-            {pendingTasks.data?.items.length ? (
-              pendingTasks.data.items.map((task) => (
-                <Link key={task.id} to={`/tasks/${task.id}`} className="soft-list-item grid gap-2">
-                  <div className="font-medium">{task.title}</div>
-                  <div className="grid gap-2 text-xs text-muted-foreground">
-                    <span>{task.assignee?.name ?? "未分配"}</span>
-                    <ProgressBar value={task.progress} />
-                  </div>
-                </Link>
-              ))
-            ) : (
-              <EmptyState text="暂无待提交任务" />
-            )}
-          </CardContent>
-        </Card>
-      </div>
     </>
+  );
+}
+
+function ResourceCard({
+  title,
+  value,
+  description,
+  to,
+  icon,
+  disabled
+}: {
+  title: string;
+  value: string | number;
+  description: string;
+  to: string;
+  icon: ReactNode;
+  disabled?: boolean;
+}) {
+  const content = (
+    <>
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium text-muted-foreground">{title}</span>
+        <span className="rounded-lg bg-teal-50 p-2 text-teal-700">{icon}</span>
+      </div>
+      <div className="mt-3 text-3xl font-semibold text-slate-900">{value}</div>
+      <div className="mt-2 text-sm text-muted-foreground">{description}</div>
+    </>
+  );
+
+  if (disabled) {
+    return <div className="rounded-lg border border-border bg-white p-4 opacity-75 shadow-sm">{content}</div>;
+  }
+  return (
+    <Link to={to} className="rounded-lg border border-border bg-white p-4 shadow-sm transition hover:border-teal-200 hover:bg-teal-50/40">
+      {content}
+    </Link>
   );
 }
 

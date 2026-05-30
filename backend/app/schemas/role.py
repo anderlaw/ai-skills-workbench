@@ -21,5 +21,18 @@ class RoleList(CamelModel):
     total: int
 
 
+class RoleCreate(CamelModel):
+    code: str = Field(min_length=1, max_length=80)
+    name: str = Field(min_length=1, max_length=120)
+    description: str | None = None
+    status: str = "ACTIVE"
+
+
+class RoleUpdate(CamelModel):
+    name: str = Field(min_length=1, max_length=120)
+    description: str | None = None
+    status: str = "ACTIVE"
+
+
 class RolePermissionUpdate(CamelModel):
     permission_node_ids: list[int]

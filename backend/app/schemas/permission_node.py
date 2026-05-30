@@ -17,6 +17,16 @@ class PermissionNodeCreate(CamelModel):
     status: str = "ACTIVE"
 
 
+class PermissionNodeUpdate(CamelModel):
+    parent_id: int | None = None
+    name: str = Field(min_length=1, max_length=120)
+    route_path: str | None = None
+    operation_level: str = "GET"
+    sort_order: int = 0
+    icon: str | None = None
+    status: str = "ACTIVE"
+
+
 class PermissionNodeRead(CamelModel):
     id: int
     parent_id: int | None = None

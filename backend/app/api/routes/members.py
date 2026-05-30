@@ -4,9 +4,11 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.api.deps import db_session, require_actor, require_admin
 from app.api.utils import apply_pagination, create_audit_log, get_or_404, model_to_dict, update_model
+from app.core.errors import ApiError
 from app.core.security import Actor
 from app.models.member import Member
 from app.models.project_member import ProjectMember
+from app.models.user import User
 from app.schemas.base import AuditAction, TargetType
 from app.schemas.member import MemberCreate, MemberList, MemberRead, MemberStatusUpdate, MemberUpdate
 from app.schemas.project_member import ProjectMemberList
@@ -25,7 +27,7 @@ def list_members(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100, alias="pageSize"),
 ) -> MemberList:
-    stmt = select(Member).order_by(Member.updated_at.desc(), Member.id.desc())
+    stmt = select(Member).options(joinedload(Member.user)).order_by(Member.updated_at.desc(), Member.id.desc())
     if keyword:
         pattern = f"%{keyword}%"
         stmt = stmt.where(or_(Member.name.ilike(pattern), Member.github_username.ilike(pattern)))
@@ -43,6 +45,7 @@ def create_member(
     db: Session = Depends(db_session),
     actor: Actor = Depends(require_admin),
 ) -> Member:
+    validate_member_user_binding(db, payload.user_id)
     member = Member(**payload.model_dump())
     db.add(member)
     db.flush()
@@ -54,7 +57,10 @@ def create_member(
 
 @router.get("/{member_id}", response_model=MemberRead)
 def get_member(member_id: int, db: Session = Depends(db_session), _: Actor = Depends(require_actor)) -> Member:
-    return get_or_404(db, Member, member_id, "member")
+    member = db.scalar(select(Member).options(joinedload(Member.user)).where(Member.id == member_id))
+    if member is None:
+        return get_or_404(db, Member, member_id, "member")
+    return member
 
 
 @router.put("/{member_id}", response_model=MemberRead)
@@ -65,6 +71,8 @@ def update_member(
     actor: Actor = Depends(require_admin),
 ) -> Member:
     member = get_or_404(db, Member, member_id, "member")
+    if payload.user_id is not None and payload.user_id != member.user_id:
+        validate_member_user_binding(db, payload.user_id, current_member_id=member.id)
     before = model_to_dict(member)
     update_model(member, payload.model_dump(exclude_unset=True))
     db.flush()
@@ -109,9 +117,16 @@ def list_member_projects(
     get_or_404(db, Member, member_id, "member")
     stmt = (
         select(ProjectMember)
-        .options(joinedload(ProjectMember.project), joinedload(ProjectMember.member))
+        .options(joinedload(ProjectMember.project), joinedload(ProjectMember.member).joinedload(Member.user))
         .where(ProjectMember.member_id == member_id)
         .order_by(ProjectMember.id.desc())
     )
     items = db.scalars(stmt).all()
     return ProjectMemberList(items=items, total=len(items))
+
+
+def validate_member_user_binding(db: Session, user_id: int, current_member_id: int | None = None) -> None:
+    get_or_404(db, User, user_id, "user")
+    existing = db.scalar(select(Member).where(Member.user_id == user_id))
+    if existing is not None and existing.id != current_member_id:
+        raise ApiError(409, "MEMBER_USER_EXISTS", "该账号已绑定项目人员档案")

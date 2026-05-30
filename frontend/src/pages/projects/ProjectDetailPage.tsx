@@ -4,18 +4,18 @@ import { FormEvent, ReactNode, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import {
-  assignProjectUser,
+  addProjectMember,
   createProjectRequirement,
   getProject,
+  getProjectMembers,
   getProjectRequirements,
-  getProjectUsers,
-  removeProjectUser,
+  removeProjectMember,
   updateProjectProgress,
   updateProjectStatus
 } from "../../api/projectApi";
 import { claimRequirement, deleteRequirement, updateRequirement } from "../../api/requirementApi";
+import { getMembers } from "../../api/memberApi";
 import { getTasks } from "../../api/taskApi";
-import { getUsers } from "../../api/userApi";
 import { EmptyState } from "../../components/common/EmptyState";
 import { PageHeader } from "../../components/common/PageHeader";
 import { ProgressBar } from "../../components/common/ProgressBar";
@@ -26,7 +26,7 @@ import { Input, Select, Textarea } from "../../components/ui/Field";
 import { priorityOptions, projectStatusOptions } from "../../lib/constants";
 import { formatDateTime } from "../../lib/format";
 import { useAuth, useMenuPerm } from "../../state/auth";
-import type { ProjectUser, Requirement, User } from "../../types";
+import type { ProjectMember, Requirement, User } from "../../types";
 import { errorMessage } from "../../api/http";
 
 export function ProjectDetailPage() {
@@ -38,14 +38,23 @@ export function ProjectDetailPage() {
   const [editingRequirementId, setEditingRequirementId] = useState<number | null>(null);
 
   const project = useQuery({ queryKey: ["project", projectId], queryFn: () => getProject(projectId) });
-  const projectUsers = useQuery({ queryKey: ["project-users", projectId], queryFn: () => getProjectUsers(projectId) });
-  const allUsers = useQuery({ queryKey: ["users"], queryFn: () => getUsers({ pageSize: 100 }), enabled: isAdmin });
+  const projectMembers = useQuery({ queryKey: ["project-members", projectId], queryFn: () => getProjectMembers(projectId) });
+  const allMembers = useQuery({ queryKey: ["members"], queryFn: () => getMembers({ pageSize: 100 }), enabled: isAdmin });
   const requirements = useQuery({ queryKey: ["project-requirements", projectId], queryFn: () => getProjectRequirements(projectId) });
   const tasks = useQuery({ queryKey: ["tasks", "project", projectId], queryFn: () => getTasks({ projectId, pageSize: 100 }) });
 
   const userById = useMemo(() => {
     const map = new Map<number, User>();
-    allUsers.data?.items.forEach((item) => map.set(item.id, item));
+    allMembers.data?.items.forEach((item) => {
+      if (item.user) {
+        map.set(item.userId, item.user);
+      }
+    });
+    projectMembers.data?.items.forEach((item) => {
+      if (item.member?.user) {
+        map.set(item.member.userId, item.member.user);
+      }
+    });
     if (user) {
       map.set(user.id, {
         id: user.id,
@@ -57,18 +66,18 @@ export function ProjectDetailPage() {
       });
     }
     return map;
-  }, [allUsers.data?.items, user]);
+  }, [allMembers.data?.items, projectMembers.data?.items, user]);
 
-  const activeProjectUsers = useMemo(
-    () => projectUsers.data?.items.filter((item) => item.status === "ACTIVE") ?? [],
-    [projectUsers.data?.items]
+  const activeProjectMembers = useMemo(
+    () => projectMembers.data?.items.filter((item) => item.status === "ACTIVE") ?? [],
+    [projectMembers.data?.items]
   );
-  const isAssignedToProject = Boolean(user && activeProjectUsers.some((item) => item.userId === user.id));
+  const isAssignedToProject = Boolean(user && activeProjectMembers.some((item) => item.member?.userId === user.id));
   const canCreateRequirement = isAdmin || (isAssignedToProject && requirementPerm.has("requirement:create"));
 
   const invalidateProjectSurface = async () => {
     await queryClient.invalidateQueries({ queryKey: ["project", projectId] });
-    await queryClient.invalidateQueries({ queryKey: ["project-users", projectId] });
+    await queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
     await queryClient.invalidateQueries({ queryKey: ["project-requirements", projectId] });
     await queryClient.invalidateQueries({ queryKey: ["tasks"] });
     await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -82,12 +91,12 @@ export function ProjectDetailPage() {
     mutationFn: (payload: { status: string; description?: string }) => updateProjectStatus(projectId, payload),
     onSuccess: invalidateProjectSurface
   });
-  const assignUserMutation = useMutation({
-    mutationFn: (payload: { userId: number; responsibility?: string }) => assignProjectUser(projectId, payload),
+  const assignMemberMutation = useMutation({
+    mutationFn: (payload: { memberId: number; role: string; responsibility?: string }) => addProjectMember(projectId, payload),
     onSuccess: invalidateProjectSurface
   });
-  const removeUserMutation = useMutation({
-    mutationFn: (userId: number) => removeProjectUser(projectId, userId),
+  const removeMemberMutation = useMutation({
+    mutationFn: (memberId: number) => removeProjectMember(projectId, memberId),
     onSuccess: invalidateProjectSurface
   });
   const createRequirementMutation = useMutation({
@@ -116,8 +125,8 @@ export function ProjectDetailPage() {
   const mutationError =
     progressMutation.error ??
     statusMutation.error ??
-    assignUserMutation.error ??
-    removeUserMutation.error ??
+    assignMemberMutation.error ??
+    removeMemberMutation.error ??
     createRequirementMutation.error ??
     updateRequirementMutation.error ??
     deleteRequirementMutation.error ??
@@ -138,11 +147,12 @@ export function ProjectDetailPage() {
     statusMutation.mutate({ status: String(form.get("status")), description: String(form.get("description") ?? "") });
   }
 
-  function handleAssignUser(event: FormEvent<HTMLFormElement>) {
+  function handleAssignMember(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    assignUserMutation.mutate({
-      userId: Number(form.get("userId")),
+    assignMemberMutation.mutate({
+      memberId: Number(form.get("memberId")),
+      role: String(form.get("role") ?? "OTHER"),
       responsibility: String(form.get("responsibility") ?? "")
     });
     event.currentTarget.reset();
@@ -311,35 +321,45 @@ export function ProjectDetailPage() {
       <div className="mt-5 grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
         <Card>
           <CardHeader className="flex items-center justify-between gap-3">
-            <span className="font-semibold">项目用户</span>
-            <span className="text-xs font-medium text-muted-foreground">{activeProjectUsers.length} 人已分配</span>
+            <span className="font-semibold">项目人员</span>
+            <span className="text-xs font-medium text-muted-foreground">{activeProjectMembers.length} 人已分配</span>
           </CardHeader>
           <CardContent className="grid gap-3">
             {isAdmin ? (
-              <form className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3" onSubmit={handleAssignUser}>
-                <Select name="userId" required>
-                  <option value="">选择系统用户</option>
-                  {allUsers.data?.items.map((item) => <option key={item.id} value={item.id}>{item.displayName}（{item.username}）</option>)}
+              <form className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3" onSubmit={handleAssignMember}>
+                <Select name="memberId" required>
+                  <option value="">选择项目人员</option>
+                  {allMembers.data?.items.map((item) => <option key={item.id} value={item.id}>{item.name}（{item.user?.username ?? `用户 #${item.userId}`}）</option>)}
+                </Select>
+                <Select name="role" defaultValue="OTHER">
+                  <option value="OWNER">负责人</option>
+                  <option value="FRONTEND">前端</option>
+                  <option value="BACKEND">后端</option>
+                  <option value="FULLSTACK">全栈</option>
+                  <option value="AI">AI</option>
+                  <option value="TEST">测试</option>
+                  <option value="DEPLOY">部署</option>
+                  <option value="OTHER">其他</option>
                 </Select>
                 <Input name="responsibility" placeholder="项目内职责，例如需求整理" />
-                <Button type="submit" disabled={assignUserMutation.isPending}>
+                <Button type="submit" disabled={assignMemberMutation.isPending}>
                   <UserPlus size={15} />
                   分配到项目
                 </Button>
               </form>
             ) : null}
-            {activeProjectUsers.length ? (
-              activeProjectUsers.map((assignment) => (
-                <ProjectUserItem
+            {activeProjectMembers.length ? (
+              activeProjectMembers.map((assignment) => (
+                <ProjectMemberItem
                   key={assignment.id}
                   assignment={assignment}
-                  displayName={displayUserName(assignment.userId)}
+                  displayName={assignment.member ? `${assignment.member.name}（${assignment.member.user?.username ?? `用户 #${assignment.member.userId}`}）` : `人员 #${assignment.memberId}`}
                   canRemove={isAdmin}
-                  onRemove={() => removeUserMutation.mutate(assignment.userId)}
+                  onRemove={() => removeMemberMutation.mutate(assignment.memberId)}
                 />
               ))
             ) : (
-              <EmptyState text="暂无项目用户" />
+              <EmptyState text="暂无项目人员" />
             )}
           </CardContent>
         </Card>
@@ -443,13 +463,13 @@ function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-function ProjectUserItem({
+function ProjectMemberItem({
   assignment,
   displayName,
   canRemove,
   onRemove
 }: {
-  assignment: ProjectUser;
+  assignment: ProjectMember;
   displayName: string;
   canRemove: boolean;
   onRemove: () => void;
@@ -461,7 +481,7 @@ function ProjectUserItem({
         <div className="mt-1 text-muted-foreground">{assignment.responsibility || "未填写职责"}</div>
       </div>
       {canRemove ? (
-        <Button variant="ghost" type="button" onClick={onRemove} title="移除项目用户">
+        <Button variant="ghost" type="button" onClick={onRemove} title="移除项目人员">
           <UserMinus size={15} />
         </Button>
       ) : null}

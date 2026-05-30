@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session, joinedload
@@ -11,9 +9,7 @@ from app.core.security import Actor
 from app.models.member import Member
 from app.models.project import Project
 from app.models.project_member import ProjectMember
-from app.models.project_user import ProjectUser
 from app.models.requirement import Requirement
-from app.models.user import User
 from app.schemas.base import AuditAction, TargetType
 from app.schemas.project import (
     ProjectCreate,
@@ -24,7 +20,6 @@ from app.schemas.project import (
     ProjectUpdate,
 )
 from app.schemas.project_member import ProjectMemberCreate, ProjectMemberList, ProjectMemberRead
-from app.schemas.project_user import ProjectUserCreate, ProjectUserList, ProjectUserRead
 from app.schemas.requirement import RequirementCreate, RequirementList, RequirementRead
 
 
@@ -157,105 +152,12 @@ def list_project_members(
     get_or_404(db, Project, project_id, "project")
     stmt = (
         select(ProjectMember)
-        .options(joinedload(ProjectMember.member), joinedload(ProjectMember.project))
+        .options(joinedload(ProjectMember.member).joinedload(Member.user), joinedload(ProjectMember.project))
         .where(ProjectMember.project_id == project_id)
         .order_by(ProjectMember.id.desc())
     )
     items = db.scalars(stmt).all()
     return ProjectMemberList(items=items, total=len(items))
-
-
-@router.get("/{project_id}/users", response_model=ProjectUserList)
-def list_project_users(
-    project_id: int,
-    db: Session = Depends(db_session),
-    _: Actor = Depends(require_actor),
-) -> ProjectUserList:
-    get_or_404(db, Project, project_id, "project")
-    items = db.scalars(
-        select(ProjectUser)
-        .where(ProjectUser.project_id == project_id)
-        .order_by(ProjectUser.id.desc())
-    ).all()
-    return ProjectUserList(items=items, total=len(items))
-
-
-@router.post("/{project_id}/users", response_model=ProjectUserRead, status_code=201)
-def assign_project_user(
-    project_id: int,
-    payload: ProjectUserCreate,
-    db: Session = Depends(db_session),
-    actor: Actor = Depends(require_admin),
-) -> ProjectUser:
-    get_or_404(db, Project, project_id, "project")
-    get_or_404(db, User, payload.user_id, "user")
-    assignment = db.scalar(
-        select(ProjectUser).where(
-            ProjectUser.project_id == project_id,
-            ProjectUser.user_id == payload.user_id,
-        )
-    )
-    before = model_to_dict(assignment)
-    if assignment is None:
-        assignment = ProjectUser(
-            project_id=project_id,
-            user_id=payload.user_id,
-            responsibility=payload.responsibility,
-            status=payload.status,
-            assigned_at=datetime.now(timezone.utc),
-        )
-        db.add(assignment)
-    else:
-        assignment.responsibility = payload.responsibility
-        assignment.status = "ACTIVE"
-        assignment.assigned_at = datetime.now(timezone.utc)
-        assignment.removed_at = None
-    db.flush()
-    create_audit_log(
-        db,
-        actor,
-        AuditAction.ASSIGN,
-        TargetType.PROJECT_MEMBER,
-        assignment.id,
-        before,
-        model_to_dict(assignment),
-        "分配项目用户",
-    )
-    db.commit()
-    db.refresh(assignment)
-    return assignment
-
-
-@router.delete("/{project_id}/users/{user_id}", status_code=204)
-def remove_project_user(
-    project_id: int,
-    user_id: int,
-    db: Session = Depends(db_session),
-    actor: Actor = Depends(require_admin),
-) -> None:
-    assignment = db.scalar(
-        select(ProjectUser).where(
-            ProjectUser.project_id == project_id,
-            ProjectUser.user_id == user_id,
-        )
-    )
-    if assignment is None:
-        raise ApiError(404, "PROJECT_USER_NOT_FOUND", "项目用户分配不存在")
-    before = model_to_dict(assignment)
-    assignment.status = "REMOVED"
-    assignment.removed_at = datetime.now(timezone.utc)
-    db.flush()
-    create_audit_log(
-        db,
-        actor,
-        AuditAction.REMOVE,
-        TargetType.PROJECT_MEMBER,
-        assignment.id,
-        before,
-        model_to_dict(assignment),
-        "移除项目用户",
-    )
-    db.commit()
 
 
 @router.get("/{project_id}/requirements", response_model=RequirementList)
@@ -289,10 +191,13 @@ def create_requirement(
         if not has_permission(actor, "requirement", "requirement:create"):
             raise ApiError(403, "FORBIDDEN", "无权执行该操作")
         assignment = db.scalar(
-            select(ProjectUser).where(
-                ProjectUser.project_id == project_id,
-                ProjectUser.user_id == actor.id,
-                ProjectUser.status == "ACTIVE",
+            select(ProjectMember)
+            .join(Member, Member.id == ProjectMember.member_id)
+            .where(
+                ProjectMember.project_id == project_id,
+                ProjectMember.status == "ACTIVE",
+                Member.user_id == actor.id,
+                Member.status == "ACTIVE",
             )
         )
         if assignment is None:
@@ -353,7 +258,7 @@ def add_project_member(
     db.commit()
     return db.scalar(
         select(ProjectMember)
-        .options(joinedload(ProjectMember.member), joinedload(ProjectMember.project))
+        .options(joinedload(ProjectMember.member).joinedload(Member.user), joinedload(ProjectMember.project))
         .where(ProjectMember.id == relation.id)
     )
 

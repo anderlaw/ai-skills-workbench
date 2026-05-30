@@ -34,8 +34,13 @@ def test_auth_me_returns_roles_menu_tree_and_permission_scopes(client):
     assert "member:create" in body["permissionScopes"]["member"]
     assert "task:create" in body["permissionScopes"]["task"]
     assert "role" in body["permissionScopes"]
+    assert "role:create" in body["permissionScopes"]["role"]
+    assert "role:update" in body["permissionScopes"]["role"]
+    assert "role:delete" in body["permissionScopes"]["role"]
     assert "role:update-permissions" in body["permissionScopes"]["role"]
     assert "permission-node" in body["permissionScopes"]
+    assert "permission-node:update" in body["permissionScopes"]["permission-node"]
+    assert "permission-node:delete" in body["permissionScopes"]["permission-node"]
     assert "project-assignment" in body["permissionScopes"]
     assert "user:assign-roles" in body["permissionScopes"]["user"]
 
@@ -65,18 +70,7 @@ def test_business_reads_require_login(client):
 
 def test_contributor_without_project_assignment_cannot_create_requirement(client):
     admin_headers = auth_headers(client)
-    user_response = client.post(
-        "/api/v1/users",
-        headers=admin_headers,
-        json={
-            "username": "alice",
-            "password": "alice-pass",
-            "displayName": "Alice",
-            "roleCodes": ["CONTRIBUTOR"],
-            "status": "ACTIVE",
-        },
-    )
-    assert user_response.status_code == 201
+    create_contributor(client, admin_headers, "alice", "alice-pass")
     project_response = client.post(
         "/api/v1/projects",
         headers=admin_headers,
@@ -92,6 +86,35 @@ def test_contributor_without_project_assignment_cannot_create_requirement(client
 
     assert response.status_code == 403
     assert response.json()["code"] == "PROJECT_ASSIGNMENT_REQUIRED"
+
+
+def test_member_must_bind_to_existing_unique_user_account(client):
+    admin_headers = auth_headers(client)
+    alice = create_contributor(client, admin_headers, "alice", "alice-pass")
+
+    missing_user_response = client.post(
+        "/api/v1/members",
+        headers=admin_headers,
+        json={"userId": alice["id"] + 999, "name": "无账号人员", "status": "ACTIVE"},
+    )
+    assert missing_user_response.status_code == 404
+    assert missing_user_response.json()["code"] == "USER_NOT_FOUND"
+
+    create_response = client.post(
+        "/api/v1/members",
+        headers=admin_headers,
+        json={"userId": alice["id"], "name": "Alice 项目档案", "status": "ACTIVE"},
+    )
+    assert create_response.status_code == 201
+    assert create_response.json()["userId"] == alice["id"]
+
+    duplicate_response = client.post(
+        "/api/v1/members",
+        headers=admin_headers,
+        json={"userId": alice["id"], "name": "重复绑定", "status": "ACTIVE"},
+    )
+    assert duplicate_response.status_code == 409
+    assert duplicate_response.json()["code"] == "MEMBER_USER_EXISTS"
 
 
 def test_permission_node_code_must_be_globally_unique(client):
@@ -230,15 +253,203 @@ def test_admin_can_read_permission_tree_and_update_role_permissions(client):
     assert admin_update_response.json()["code"] == "ADMIN_ROLE_IMMUTABLE"
 
 
+def test_admin_can_create_update_and_soft_delete_roles(client):
+    headers = auth_headers(client)
+
+    create_response = client.post(
+        "/api/v1/roles",
+        headers=headers,
+        json={
+            "code": "QA_MANAGER",
+            "name": "测试负责人",
+            "description": "负责验收质量",
+            "status": "ACTIVE",
+        },
+    )
+    assert create_response.status_code == 201
+    role = create_response.json()
+    assert role["code"] == "QA_MANAGER"
+    assert role["permissionNodeIds"] == []
+
+    duplicate_response = client.post(
+        "/api/v1/roles",
+        headers=headers,
+        json={"code": "QA_MANAGER", "name": "重复角色", "status": "ACTIVE"},
+    )
+    assert duplicate_response.status_code == 409
+    assert duplicate_response.json()["code"] == "ROLE_CODE_EXISTS"
+
+    update_response = client.put(
+        f"/api/v1/roles/{role['id']}",
+        headers=headers,
+        json={
+            "name": "质量负责人",
+            "description": "负责测试和验收",
+            "status": "DISABLED",
+        },
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["name"] == "质量负责人"
+    assert update_response.json()["code"] == "QA_MANAGER"
+    assert update_response.json()["status"] == "DISABLED"
+
+    delete_response = client.delete(f"/api/v1/roles/{role['id']}", headers=headers)
+    assert delete_response.status_code == 200
+    assert delete_response.json()["status"] == "DISABLED"
+
+    logs_response = client.get("/api/v1/audit-logs", headers=headers)
+    role_logs = [item for item in logs_response.json()["items"] if item["targetType"] == "ROLE" and item["targetId"] == role["id"]]
+    assert {item["action"] for item in role_logs} >= {"CREATE", "UPDATE", "REMOVE"}
+
+
+def test_admin_role_cannot_be_edited_or_deleted(client):
+    headers = auth_headers(client)
+    roles_response = client.get("/api/v1/roles", headers=headers)
+    admin_role = next(item for item in roles_response.json()["items"] if item["code"] == "ADMIN")
+
+    update_response = client.put(
+        f"/api/v1/roles/{admin_role['id']}",
+        headers=headers,
+        json={"name": "超级管理员", "description": "不可修改", "status": "ACTIVE"},
+    )
+    assert update_response.status_code == 400
+    assert update_response.json()["code"] == "ADMIN_ROLE_IMMUTABLE"
+
+    delete_response = client.delete(f"/api/v1/roles/{admin_role['id']}", headers=headers)
+    assert delete_response.status_code == 400
+    assert delete_response.json()["code"] == "ADMIN_ROLE_IMMUTABLE"
+
+
+def test_permission_node_update_and_soft_delete_rules(client):
+    headers = auth_headers(client)
+    tree_response = client.get("/api/v1/permission-nodes/tree", headers=headers)
+    nodes = flatten_nodes(tree_response.json()["items"])
+    admin_directory = next(node for node in nodes if node["code"] == "admin")
+
+    menu_response = client.post(
+        "/api/v1/permission-nodes",
+        headers=headers,
+        json={
+            "parentId": admin_directory["id"],
+            "nodeType": "MENU",
+            "name": "测试菜单",
+            "code": "test-menu",
+            "routePath": "test-menu",
+            "operationLevel": "GET",
+            "sortOrder": 200,
+            "status": "ACTIVE",
+        },
+    )
+    assert menu_response.status_code == 201
+    menu = menu_response.json()
+
+    permission_response = client.post(
+        "/api/v1/permission-nodes",
+        headers=headers,
+        json={
+            "parentId": menu["id"],
+            "nodeType": "PERMISSION",
+            "name": "测试操作",
+            "code": "test-menu:operate",
+            "operationLevel": "POST",
+            "sortOrder": 10,
+            "status": "ACTIVE",
+        },
+    )
+    assert permission_response.status_code == 201
+    permission = permission_response.json()
+
+    update_response = client.put(
+        f"/api/v1/permission-nodes/{permission['id']}",
+        headers=headers,
+        json={
+            "parentId": menu["id"],
+            "name": "测试操作更新",
+            "routePath": None,
+            "operationLevel": "BOTH",
+            "sortOrder": 20,
+            "icon": None,
+            "status": "ACTIVE",
+        },
+    )
+    assert update_response.status_code == 200
+    assert update_response.json()["code"] == "test-menu:operate"
+    assert update_response.json()["name"] == "测试操作更新"
+    assert update_response.json()["operationLevel"] == "BOTH"
+
+    parent_delete_response = client.delete(f"/api/v1/permission-nodes/{menu['id']}", headers=headers)
+    assert parent_delete_response.status_code == 400
+    assert parent_delete_response.json()["code"] == "PERMISSION_NODE_HAS_ACTIVE_CHILDREN"
+
+    child_delete_response = client.delete(f"/api/v1/permission-nodes/{permission['id']}", headers=headers)
+    assert child_delete_response.status_code == 200
+    assert child_delete_response.json()["status"] == "DISABLED"
+
+    role_response = client.post(
+        "/api/v1/roles",
+        headers=headers,
+        json={"code": "NODE_TESTER", "name": "节点测试员", "status": "ACTIVE"},
+    )
+    assert role_response.status_code == 201
+    disabled_grant_response = client.put(
+        f"/api/v1/roles/{role_response.json()['id']}/permission-nodes",
+        headers=headers,
+        json={"permissionNodeIds": [permission["id"]]},
+    )
+    assert disabled_grant_response.status_code == 400
+    assert disabled_grant_response.json()["code"] == "PERMISSION_NODE_NOT_ACTIVE"
+
+
+def test_permission_node_update_rejects_invalid_parent_or_cycle(client):
+    headers = auth_headers(client)
+    tree_response = client.get("/api/v1/permission-nodes/tree", headers=headers)
+    nodes = flatten_nodes(tree_response.json()["items"])
+    admin_directory = next(node for node in nodes if node["code"] == "admin")
+
+    child_directory_response = client.post(
+        "/api/v1/permission-nodes",
+        headers=headers,
+        json={
+            "parentId": admin_directory["id"],
+            "nodeType": "DIRECTORY",
+            "name": "子目录",
+            "code": "child-directory",
+            "routePath": "child-directory",
+            "operationLevel": "GET",
+            "sortOrder": 300,
+            "status": "ACTIVE",
+        },
+    )
+    assert child_directory_response.status_code == 201
+    child_directory = child_directory_response.json()
+
+    cycle_response = client.put(
+        f"/api/v1/permission-nodes/{admin_directory['id']}",
+        headers=headers,
+        json={
+            "parentId": child_directory["id"],
+            "name": admin_directory["name"],
+            "routePath": admin_directory["routePath"],
+            "operationLevel": admin_directory["operationLevel"],
+            "sortOrder": admin_directory["sortOrder"],
+            "icon": admin_directory["icon"],
+            "status": "ACTIVE",
+        },
+    )
+    assert cycle_response.status_code == 400
+    assert cycle_response.json()["code"] == "INVALID_PERMISSION_NODE_PARENT"
+
+
 def test_contributor_cannot_mutate_projects_members_or_tasks(client):
     admin_headers = auth_headers(client)
-    create_contributor(client, admin_headers, "alice", "alice-pass")
+    alice = create_contributor(client, admin_headers, "alice", "alice-pass")
+    zhangsan = create_contributor(client, admin_headers, "zhangsan", "zhangsan-pass")
     project = create_project(client, admin_headers, "项目 A")
 
     member_response = client.post(
         "/api/v1/members",
         headers=admin_headers,
-        json={"name": "张三", "status": "ACTIVE"},
+        json={"userId": zhangsan["id"], "name": "张三", "status": "ACTIVE"},
     )
     assert member_response.status_code == 201
     member = member_response.json()
@@ -273,11 +484,12 @@ def test_project_assignment_enables_requirement_flow_and_enforces_ownership(clie
     alice = create_contributor(client, admin_headers, "alice", "alice-pass")
     bob = create_contributor(client, admin_headers, "bob", "bob-pass")
     project = create_project(client, admin_headers, "项目 A")
+    alice_member = create_member_for_user(client, admin_headers, alice, "Alice 项目人员")
 
     assign_response = client.post(
-        f"/api/v1/projects/{project['id']}/users",
+        f"/api/v1/projects/{project['id']}/members",
         headers=admin_headers,
-        json={"userId": alice["id"], "responsibility": "需求整理"},
+        json={"memberId": alice_member["id"], "role": "OTHER", "responsibility": "需求整理"},
     )
     assert assign_response.status_code == 201
     assert assign_response.json()["status"] == "ACTIVE"
@@ -338,14 +550,15 @@ def test_removed_project_assignment_revokes_requirement_write_access(client):
     admin_headers = auth_headers(client)
     alice = create_contributor(client, admin_headers, "alice", "alice-pass")
     project = create_project(client, admin_headers, "项目 A")
+    alice_member = create_member_for_user(client, admin_headers, alice, "Alice 项目人员")
     assign_response = client.post(
-        f"/api/v1/projects/{project['id']}/users",
+        f"/api/v1/projects/{project['id']}/members",
         headers=admin_headers,
-        json={"userId": alice["id"], "responsibility": "需求整理"},
+        json={"memberId": alice_member["id"], "role": "OTHER", "responsibility": "需求整理"},
     )
     assert assign_response.status_code == 201
     remove_response = client.delete(
-        f"/api/v1/projects/{project['id']}/users/{alice['id']}",
+        f"/api/v1/projects/{project['id']}/members/{alice_member['id']}",
         headers=admin_headers,
     )
     assert remove_response.status_code == 204
@@ -369,6 +582,22 @@ def create_contributor(client: TestClient, headers: dict[str, str], username: st
             "password": password,
             "displayName": username.title(),
             "roleCodes": ["CONTRIBUTOR"],
+            "status": "ACTIVE",
+        },
+    )
+    assert response.status_code == 201
+    return response.json()
+
+
+def create_member_for_user(client: TestClient, headers: dict[str, str], user: dict, name: str) -> dict:
+    response = client.post(
+        "/api/v1/members",
+        headers=headers,
+        json={
+            "userId": user["id"],
+            "name": name,
+            "email": user.get("email"),
+            "githubUsername": user.get("githubUsername"),
             "status": "ACTIVE",
         },
     )

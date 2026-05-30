@@ -1,4 +1,4 @@
-import type { ListResponse, Project, ProjectMember, ProjectUser, Requirement } from "../types";
+import type { ListResponse, Project, ProjectMember, Requirement } from "../types";
 import { http } from "./http";
 
 export type ProjectInput = Record<string, unknown> & { name: string; techStack?: string[] };
@@ -48,23 +48,6 @@ export async function addProjectMember(
 
 export async function removeProjectMember(projectId: string | number, memberId: string | number) {
   await http.delete(`/projects/${projectId}/members/${memberId}`);
-}
-
-export async function getProjectUsers(projectId: string | number) {
-  const response = await http.get<ListResponse<ProjectUser>>(`/projects/${projectId}/users`);
-  return response.data;
-}
-
-export async function assignProjectUser(
-  projectId: string | number,
-  data: { userId: number; responsibility?: string; status?: string }
-) {
-  const response = await http.post<ProjectUser>(`/projects/${projectId}/users`, data);
-  return response.data;
-}
-
-export async function removeProjectUser(projectId: string | number, userId: string | number) {
-  await http.delete(`/projects/${projectId}/users/${userId}`);
 }
 
 export async function getProjectRequirements(projectId: string | number, params?: Record<string, unknown>) {

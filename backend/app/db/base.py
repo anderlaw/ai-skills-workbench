@@ -6,7 +6,6 @@ from app.models.member import Member  # noqa: E402,F401
 from app.models.permission_node import PermissionNode  # noqa: E402,F401
 from app.models.project import Project  # noqa: E402,F401
 from app.models.project_member import ProjectMember  # noqa: E402,F401
-from app.models.project_user import ProjectUser  # noqa: E402,F401
 from app.models.requirement import Requirement  # noqa: E402,F401
 from app.models.role import Role  # noqa: E402,F401
 from app.models.role_permission_node import RolePermissionNode  # noqa: E402,F401

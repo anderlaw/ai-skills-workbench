@@ -44,19 +44,20 @@ export function MemberDetailPage() {
   return (
     <>
       <PageHeader
-        title={data?.name ?? "成员详情"}
-        description="查看成员参与项目和负责任务。"
+        title={data?.name ?? "项目人员详情"}
+        description="查看项目人员绑定账号、参与项目和负责任务。"
         actions={isAdmin && data ? <Link to={`/members/${data.id}/edit`}><Button><Edit size={16} />编辑成员</Button></Link> : null}
       />
       {data ? (
         <div className="grid gap-5 lg:grid-cols-[1fr_0.8fr]">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <span className="font-semibold">成员信息</span>
+              <span className="font-semibold">项目人员信息</span>
               <MemberStatusBadge status={data.status} />
             </CardHeader>
             <CardContent>
               <dl className="detail-grid">
+                <div className="detail-item"><dt className="detail-label">绑定账号</dt><dd className="detail-value">{data.user ? `${data.user.displayName}（${data.user.username}）` : `用户 #${data.userId}`}</dd></div>
                 <div className="detail-item"><dt className="detail-label">联系方式</dt><dd className="detail-value">{data.contact ?? "-"}</dd></div>
                 <div className="detail-item"><dt className="detail-label">邮箱</dt><dd className="detail-value">{data.email ?? "-"}</dd></div>
                 <div className="detail-item"><dt className="detail-label">GitHub</dt><dd className="detail-value">{data.githubUsername ?? "-"}</dd></div>

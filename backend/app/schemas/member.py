@@ -3,9 +3,11 @@ from datetime import datetime
 from pydantic import Field
 
 from app.schemas.base import CamelModel, MemberStatus
+from app.schemas.user import UserRead
 
 
 class MemberBase(CamelModel):
+    user_id: int
     name: str = Field(..., min_length=1, max_length=120)
     contact: str | None = None
     github_username: str | None = None
@@ -21,6 +23,7 @@ class MemberCreate(MemberBase):
 
 
 class MemberUpdate(CamelModel):
+    user_id: int | None = None
     name: str | None = Field(None, min_length=1, max_length=120)
     contact: str | None = None
     github_username: str | None = None
@@ -38,6 +41,7 @@ class MemberStatusUpdate(CamelModel):
 
 class MemberRead(CamelModel):
     id: int
+    user_id: int
     name: str
     contact: str | None
     github_username: str | None
@@ -48,6 +52,7 @@ class MemberRead(CamelModel):
     remark: str | None
     created_at: datetime
     updated_at: datetime
+    user: UserRead | None = None
 
 
 class MemberList(CamelModel):

@@ -18,6 +18,9 @@ class DashboardSummary(CamelModel):
     done_task_total: int
     pending_submission_task_total: int
     submitted_task_total: int
+    requirement_total: int
+    open_requirement_total: int
+    claimed_requirement_total: int
     average_project_progress: float
 
 

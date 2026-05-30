@@ -33,11 +33,11 @@ DEFAULT_PERMISSION_TREE = [
     {"node_type": "PERMISSION", "name": "新增任务", "code": "task:create", "parent_code": "task", "sort_order": 30, "operation_level": "POST"},
     {"node_type": "PERMISSION", "name": "编辑任务", "code": "task:update", "parent_code": "task", "sort_order": 40, "operation_level": "POST"},
     {"node_type": "PERMISSION", "name": "提交任务", "code": "task:submit", "parent_code": "task", "sort_order": 50, "operation_level": "POST"},
-    {"node_type": "MENU", "name": "人员", "code": "member", "route_path": "members", "parent_code": "project-collab", "sort_order": 40, "icon": "Users"},
-    {"node_type": "PERMISSION", "name": "人员列表", "code": "member:list", "parent_code": "member", "sort_order": 10},
-    {"node_type": "PERMISSION", "name": "人员详情", "code": "member:view", "parent_code": "member", "sort_order": 20},
-    {"node_type": "PERMISSION", "name": "新增人员", "code": "member:create", "parent_code": "member", "sort_order": 30, "operation_level": "POST"},
-    {"node_type": "PERMISSION", "name": "编辑人员", "code": "member:update", "parent_code": "member", "sort_order": 40, "operation_level": "POST"},
+    {"node_type": "MENU", "name": "项目人员", "code": "member", "route_path": "members", "parent_code": "project-collab", "sort_order": 40, "icon": "Users"},
+    {"node_type": "PERMISSION", "name": "项目人员列表", "code": "member:list", "parent_code": "member", "sort_order": 10},
+    {"node_type": "PERMISSION", "name": "项目人员详情", "code": "member:view", "parent_code": "member", "sort_order": 20},
+    {"node_type": "PERMISSION", "name": "新增项目人员", "code": "member:create", "parent_code": "member", "sort_order": 30, "operation_level": "POST"},
+    {"node_type": "PERMISSION", "name": "编辑项目人员", "code": "member:update", "parent_code": "member", "sort_order": 40, "operation_level": "POST"},
     {"node_type": "DIRECTORY", "name": "管理", "code": "admin", "route_path": "admin", "sort_order": 30, "icon": "ShieldCheck"},
     {"node_type": "MENU", "name": "用户管理", "code": "user", "route_path": "users", "parent_code": "admin", "sort_order": 10, "icon": "Users"},
     {"node_type": "PERMISSION", "name": "用户列表", "code": "user:list", "parent_code": "user", "sort_order": 10},
@@ -45,7 +45,10 @@ DEFAULT_PERMISSION_TREE = [
     {"node_type": "PERMISSION", "name": "分配用户角色", "code": "user:assign-roles", "parent_code": "user", "sort_order": 30, "operation_level": "POST"},
     {"node_type": "MENU", "name": "角色管理", "code": "role", "route_path": "roles", "parent_code": "admin", "sort_order": 20, "icon": "ShieldCheck"},
     {"node_type": "PERMISSION", "name": "角色列表", "code": "role:list", "parent_code": "role", "sort_order": 10},
-    {"node_type": "PERMISSION", "name": "角色授权", "code": "role:update-permissions", "parent_code": "role", "sort_order": 20, "operation_level": "POST"},
+    {"node_type": "PERMISSION", "name": "新增角色", "code": "role:create", "parent_code": "role", "sort_order": 20, "operation_level": "POST"},
+    {"node_type": "PERMISSION", "name": "编辑角色", "code": "role:update", "parent_code": "role", "sort_order": 30, "operation_level": "POST"},
+    {"node_type": "PERMISSION", "name": "删除角色", "code": "role:delete", "parent_code": "role", "sort_order": 40, "operation_level": "POST"},
+    {"node_type": "PERMISSION", "name": "角色授权", "code": "role:update-permissions", "parent_code": "role", "sort_order": 50, "operation_level": "POST"},
     {"node_type": "MENU", "name": "项目分配", "code": "project-assignment", "route_path": "project-assignments", "parent_code": "admin", "sort_order": 30, "icon": "UserPlus"},
     {"node_type": "PERMISSION", "name": "项目分配列表", "code": "project-assignment:list", "parent_code": "project-assignment", "sort_order": 10},
     {"node_type": "PERMISSION", "name": "分配项目用户", "code": "project-assignment:create", "parent_code": "project-assignment", "sort_order": 20, "operation_level": "POST"},
@@ -53,6 +56,8 @@ DEFAULT_PERMISSION_TREE = [
     {"node_type": "MENU", "name": "权限配置", "code": "permission-node", "route_path": "permissions", "parent_code": "admin", "sort_order": 40, "icon": "KeyRound"},
     {"node_type": "PERMISSION", "name": "权限树列表", "code": "permission-node:list", "parent_code": "permission-node", "sort_order": 10},
     {"node_type": "PERMISSION", "name": "新增权限节点", "code": "permission-node:create", "parent_code": "permission-node", "sort_order": 20, "operation_level": "POST"},
+    {"node_type": "PERMISSION", "name": "编辑权限节点", "code": "permission-node:update", "parent_code": "permission-node", "sort_order": 30, "operation_level": "POST"},
+    {"node_type": "PERMISSION", "name": "删除权限节点", "code": "permission-node:delete", "parent_code": "permission-node", "sort_order": 40, "operation_level": "POST"},
     {"node_type": "MENU", "name": "审计日志", "code": "audit-log", "route_path": "audit-logs", "parent_code": "admin", "sort_order": 50, "icon": "FileClock"},
     {"node_type": "PERMISSION", "name": "审计日志列表", "code": "audit-log:list", "parent_code": "audit-log", "sort_order": 10},
 ]
@@ -122,6 +127,16 @@ def seed_defaults(db: Session) -> None:
             )
             db.add(node)
             db.flush()
+        else:
+            parent_code = item.get("parent_code")
+            node.parent_id = code_to_node[parent_code].id if parent_code else None
+            node.node_type = item["node_type"]
+            node.name = item["name"]
+            node.route_path = item.get("route_path")
+            node.operation_level = item.get("operation_level", "GET")
+            node.sort_order = item.get("sort_order", 0)
+            node.icon = item.get("icon")
+            node.status = "ACTIVE"
         code_to_node[node.code] = node
 
     all_nodes = list(code_to_node.values())

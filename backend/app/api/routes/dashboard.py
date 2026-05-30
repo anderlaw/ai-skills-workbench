@@ -7,6 +7,7 @@ from app.core.security import Actor
 from app.models.audit_log import AuditLog
 from app.models.member import Member
 from app.models.project import Project
+from app.models.requirement import Requirement
 from app.models.task import Task
 from app.schemas.dashboard import (
     DashboardSummary,
@@ -46,6 +47,9 @@ def summary(db: Session = Depends(db_session), _: Actor = Depends(require_actor)
         done_task_total=count_where(db, Task, Task.status == "DONE"),
         pending_submission_task_total=count_where(db, Task, Task.status.in_(["TODO", "IN_PROGRESS"])),
         submitted_task_total=count_where(db, Task, Task.status == "SUBMITTED"),
+        requirement_total=count_where(db, Requirement),
+        open_requirement_total=count_where(db, Requirement, Requirement.status == "OPEN"),
+        claimed_requirement_total=count_where(db, Requirement, Requirement.status == "CLAIMED"),
         average_project_progress=round(float(avg_progress), 2),
     )
 
