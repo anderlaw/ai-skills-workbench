@@ -10,7 +10,7 @@ export const http = axios.create({
 });
 
 http.interceptors.request.use((config) => {
-  const token = localStorage.getItem("project-tracker-token");
+  const token = localStorage.getItem("dazi-workshop-token");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -21,7 +21,7 @@ http.interceptors.response.use(
   (response) => response,
   (error) => {
     if (axios.isAxiosError(error) && error.response?.status === 401 && window.location.pathname !== "/login") {
-      localStorage.removeItem("project-tracker-token");
+      localStorage.removeItem("dazi-workshop-token");
       window.location.assign("/login");
     }
     return Promise.reject(error);

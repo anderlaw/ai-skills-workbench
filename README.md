@@ -1,6 +1,6 @@
-# 项目进度跟踪系统 MVP
+# 搭子工坊 MVP
 
-基于 `requirement.md`、`docs/2026-05-30-system-design.md`、`docs/2026-05-30-frontend-page-design.md` 和 `docs/2026-05-30-test-cases.md` 实现的轻量级项目进度跟踪系统。系统包含项目、成员、项目成员关系、任务、审计日志和统计看板。
+搭子工坊是面向社群成员共同开发项目的轻量级协作工作台。系统基于 `requirement.md`、`docs/2026-05-30-system-design.md`、`docs/2026-05-30-frontend-page-design.md` 和 `docs/2026-05-30-test-cases.md` 实现，包含项目、成员、项目成员关系、任务、审计日志和统计看板。
 
 ## 技术栈
 

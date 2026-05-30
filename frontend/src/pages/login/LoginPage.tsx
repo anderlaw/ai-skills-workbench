@@ -62,8 +62,8 @@ export function LoginPage() {
               <FolderKanban size={22} />
             </div>
             <div>
-              <h1 className="text-xl font-semibold text-slate-950">项目进度跟踪</h1>
-              <p className="text-sm text-slate-500">登录后进入工作台</p>
+              <h1 className="text-xl font-semibold text-slate-950">搭子工坊</h1>
+              <p className="text-sm text-slate-500">登录后进入项目工作台</p>
             </div>
           </div>
           <div className="grid gap-4">

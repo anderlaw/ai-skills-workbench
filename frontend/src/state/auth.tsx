@@ -8,7 +8,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { getCurrentUser, login as loginRequest } from "../api/authApi";
 import type { CurrentMenuNode, CurrentRole, CurrentUserContext, CurrentUserInfo } from "../types";
 
-const tokenKey = "project-tracker-token";
+const tokenKey = "dazi-workshop-token";
 
 interface AuthState {
   token: string | null;

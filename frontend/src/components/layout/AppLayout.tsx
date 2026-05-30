@@ -154,8 +154,8 @@ export function AppLayout() {
               </div>
               {!sidebarCollapsed ? (
                 <div>
-                  <div className="text-base font-semibold">项目进度跟踪</div>
-                  <div className="text-xs text-slate-400">MVP 工作台</div>
+                  <div className="text-base font-semibold">搭子工坊</div>
+                  <div className="text-xs text-slate-400">项目共创工作台</div>
                 </div>
               ) : null}
             </div>
@@ -197,7 +197,7 @@ export function AppLayout() {
       <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950 text-white sm:hidden">
         <div className="flex h-14 items-center gap-3 px-4">
           <Menu size={20} />
-          <span className="font-semibold">项目进度跟踪</span>
+          <span className="font-semibold">搭子工坊</span>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-3 pb-3">
           {flattenMenu(navTree).map((item) =>

@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     业务意义：承载 `Settings` 相关的数据边界或能力，供系统其他模块复用。
     """
-    app_name: str = "project-tracker"
+    app_name: str = "搭子工坊 API"
     app_env: str = "local"
     database_url: str = Field(
         "postgresql+psycopg://postgres:postgres@localhost:5432/project_tracker",
