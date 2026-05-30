@@ -121,7 +121,7 @@ def update_project_progress(
     db: Session = Depends(db_session),
     actor: Actor = Depends(require_admin),
 ) -> Project:
-    """更新项目整体进度和当前进展说明。
+    """更新项目整体进度、当前进展、当前问题和下一步计划。
 
     参数：`project_id` 表示调用方传入的业务参数；`payload` 表示接口请求体或业务输入数据；`db` 表示数据库会话，用于查询和提交业务数据；`actor` 表示当前登录用户上下文，用于权限判断和审计记录。
     返回：更新后的项目；CONTRIBUTOR 无权修改项目进度。
@@ -131,6 +131,10 @@ def update_project_progress(
     project.progress = payload.progress
     if payload.current_progress is not None:
         project.current_progress = payload.current_progress
+    if payload.current_issues is not None:
+        project.current_issues = payload.current_issues
+    if payload.next_steps is not None:
+        project.next_steps = payload.next_steps
     db.flush()
     create_audit_log(
         db,
@@ -140,7 +144,7 @@ def update_project_progress(
         project.id,
         before,
         model_to_dict(project),
-        payload.current_progress,
+        payload.current_progress or payload.current_issues or payload.next_steps,
     )
     db.commit()
     db.refresh(project)

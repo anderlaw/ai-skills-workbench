@@ -53,7 +53,10 @@ export async function updateProject(id: string | number, data: Record<string, un
  * 参数：`id` 表示调用方传入的业务参数；`data` 表示调用方传入的业务参数。
  * 返回：返回转换后的业务结果或供调用方继续使用的数据。
  */
-export async function updateProjectProgress(id: string | number, data: { progress: number; currentProgress?: string }) {
+export async function updateProjectProgress(
+  id: string | number,
+  data: { progress: number; currentProgress?: string; currentIssues?: string; nextSteps?: string }
+) {
   const response = await http.patch<Project>(`/projects/${id}/progress`, data);
   return response.data;
 }

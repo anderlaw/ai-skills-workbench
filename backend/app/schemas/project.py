@@ -70,6 +70,8 @@ class ProjectProgressUpdate(CamelModel):
     """
     progress: int = Field(..., ge=0, le=100)
     current_progress: str | None = None
+    current_issues: str | None = None
+    next_steps: str | None = None
 
 
 class ProjectStatusUpdate(CamelModel):
