@@ -1,3 +1,8 @@
+/**
+ * 项目分配页面模块，负责项目与项目人员的分配关系维护。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UserMinus, UserPlus } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
@@ -14,6 +19,11 @@ import { Card, CardContent, CardHeader } from "../../components/ui/Card";
 import { Input, Select } from "../../components/ui/Field";
 import { useAuth } from "../../state/auth";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function ProjectAssignmentPage() {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
@@ -39,6 +49,11 @@ export function ProjectAssignmentPage() {
     onSuccess: invalidateAssignments
   });
 
+  /**
+   * 业务意义：刷新当前项目的分配关系和看板统计。
+   * 参数：无。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   async function invalidateAssignments() {
     await queryClient.invalidateQueries({ queryKey: ["project-members", selectedProjectId] });
     await queryClient.invalidateQueries({ queryKey: ["dashboard"] });
@@ -48,6 +63,11 @@ export function ProjectAssignmentPage() {
     return <PageHeader title="无权访问" description="项目分配仅管理员可用。" />;
   }
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);

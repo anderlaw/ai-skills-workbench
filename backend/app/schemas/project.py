@@ -1,3 +1,8 @@
+"""project schema 模块，定义接口请求体、响应体和字段校验结构。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from datetime import date, datetime
 
 from pydantic import Field
@@ -6,6 +11,10 @@ from app.schemas.base import CamelModel, OptionalUrlMixin, ProgressMixin, Projec
 
 
 class ProjectBase(OptionalUrlMixin, ProgressMixin):
+    """ProjectBase 数据结构，定义接口请求或响应字段及校验规则。
+
+    业务意义：承载 `ProjectBase` 相关的数据边界或能力，供系统其他模块复用。
+    """
     name: str = Field(..., min_length=1, max_length=200)
     description: str | None = None
     project_type: str | None = None
@@ -24,10 +33,18 @@ class ProjectBase(OptionalUrlMixin, ProgressMixin):
 
 
 class ProjectCreate(ProjectBase):
+    """ProjectCreate 数据结构，定义接口请求或响应字段及校验规则。
+
+    业务意义：承载 `ProjectCreate` 相关的数据边界或能力，供系统其他模块复用。
+    """
     pass
 
 
 class ProjectUpdate(OptionalUrlMixin, CamelModel):
+    """ProjectUpdate 数据结构，定义接口请求或响应字段及校验规则。
+
+    业务意义：承载 `ProjectUpdate` 相关的数据边界或能力，供系统其他模块复用。
+    """
     name: str | None = Field(None, min_length=1, max_length=200)
     description: str | None = None
     project_type: str | None = None
@@ -47,16 +64,28 @@ class ProjectUpdate(OptionalUrlMixin, CamelModel):
 
 
 class ProjectProgressUpdate(CamelModel):
+    """ProjectProgressUpdate 数据结构，定义接口请求或响应字段及校验规则。
+
+    业务意义：承载 `ProjectProgressUpdate` 相关的数据边界或能力，供系统其他模块复用。
+    """
     progress: int = Field(..., ge=0, le=100)
     current_progress: str | None = None
 
 
 class ProjectStatusUpdate(CamelModel):
+    """ProjectStatusUpdate 数据结构，定义接口请求或响应字段及校验规则。
+
+    业务意义：承载 `ProjectStatusUpdate` 相关的数据边界或能力，供系统其他模块复用。
+    """
     status: ProjectStatus
     description: str | None = None
 
 
 class ProjectRead(CamelModel):
+    """ProjectRead 数据结构，定义接口请求或响应字段及校验规则。
+
+    业务意义：承载 `ProjectRead` 相关的数据边界或能力，供系统其他模块复用。
+    """
     id: int
     name: str
     description: str | None
@@ -79,5 +108,9 @@ class ProjectRead(CamelModel):
 
 
 class ProjectList(CamelModel):
+    """ProjectList 数据结构，定义接口请求或响应字段及校验规则。
+
+    业务意义：承载 `ProjectList` 相关的数据边界或能力，供系统其他模块复用。
+    """
     items: list[ProjectRead]
     total: int

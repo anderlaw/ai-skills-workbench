@@ -1,3 +1,8 @@
+/**
+ * 登录页面模块，负责账号密码输入、登录提交和已登录跳转。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { FormEvent, useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { FolderKanban, LogIn } from "lucide-react";
@@ -7,6 +12,11 @@ import { useAuth } from "../../state/auth";
 import { Button } from "../../components/ui/Button";
 import { Input } from "../../components/ui/Field";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function LoginPage() {
   const { login, loading, user } = useAuth();
   const navigate = useNavigate();
@@ -23,6 +33,11 @@ export function LoginPage() {
     return <Navigate to="/dashboard" replace />;
   }
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");

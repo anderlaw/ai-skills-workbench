@@ -1,3 +1,8 @@
+"""项目 ORM 模型模块，保存项目基础信息、进度、状态和相关关系。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from datetime import date
 
 from sqlalchemy import JSON, String, Text
@@ -8,6 +13,10 @@ from app.models.base import IdMixin, TimestampMixin
 
 
 class Project(IdMixin, TimestampMixin, Base):
+    """Project ORM 模型，映射业务数据库表并描述字段含义。
+
+    业务意义：承载 `Project` 相关的数据边界或能力，供系统其他模块复用。
+    """
     __tablename__ = "projects"
 
     name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)

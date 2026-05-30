@@ -1,3 +1,8 @@
+"""统计看板接口模块，负责项目、项目人员、任务、需求和近期动态聚合。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
@@ -23,6 +28,11 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
 
 def count_where(db: Session, model, *criteria) -> int:
+    """按条件统计业务数据数量。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`model` 表示ORM 模型类或实例；`*criteria` 表示调用方传入的业务参数。
+    返回：满足条件的记录数量。
+    """
     stmt = select(func.count()).select_from(model)
     for criterion in criteria:
         stmt = stmt.where(criterion)
@@ -31,6 +41,11 @@ def count_where(db: Session, model, *criteria) -> int:
 
 @router.get("/summary", response_model=DashboardSummary)
 def summary(db: Session = Depends(db_session), _: Actor = Depends(require_actor)) -> DashboardSummary:
+    """返回看板顶部统计汇总。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`_` 表示依赖注入占位参数，用于触发登录或权限校验。
+    返回：项目、项目人员、任务和需求的总量及分状态数量。
+    """
     project_total = count_where(db, Project)
     avg_progress = db.scalar(select(func.avg(Project.progress))) or 0
     return DashboardSummary(
@@ -56,6 +71,11 @@ def summary(db: Session = Depends(db_session), _: Actor = Depends(require_actor)
 
 @router.get("/project-status", response_model=StatusCountList)
 def project_status(db: Session = Depends(db_session), _: Actor = Depends(require_actor)) -> StatusCountList:
+    """按项目状态聚合项目数量。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`_` 表示依赖注入占位参数，用于触发登录或权限校验。
+    返回：项目状态分布列表。
+    """
     rows = db.execute(select(Project.status, func.count()).group_by(Project.status)).all()
     items = [StatusCount(status=status, total=total) for status, total in rows]
     return StatusCountList(items=items, total=len(items))
@@ -63,6 +83,11 @@ def project_status(db: Session = Depends(db_session), _: Actor = Depends(require
 
 @router.get("/task-status", response_model=StatusCountList)
 def task_status(db: Session = Depends(db_session), _: Actor = Depends(require_actor)) -> StatusCountList:
+    """按任务状态聚合任务数量。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`_` 表示依赖注入占位参数，用于触发登录或权限校验。
+    返回：任务状态分布列表。
+    """
     rows = db.execute(select(Task.status, func.count()).group_by(Task.status)).all()
     items = [StatusCount(status=status, total=total) for status, total in rows]
     return StatusCountList(items=items, total=len(items))
@@ -74,6 +99,11 @@ def recent_projects(
     _: Actor = Depends(require_actor),
     limit: int = Query(5, ge=1, le=20),
 ) -> RecentProjects:
+    """查询最近更新的项目。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`_` 表示依赖注入占位参数，用于触发登录或权限校验；`limit` 表示调用方传入的业务参数。
+    返回：按更新时间倒序排列的项目列表。
+    """
     items = db.scalars(select(Project).order_by(Project.updated_at.desc(), Project.id.desc()).limit(limit)).all()
     return RecentProjects(items=items, total=len(items))
 
@@ -84,6 +114,11 @@ def blocked_tasks(
     _: Actor = Depends(require_actor),
     limit: int = Query(10, ge=1, le=50),
 ) -> DashboardTasks:
+    """查询阻塞任务列表。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`_` 表示依赖注入占位参数，用于触发登录或权限校验；`limit` 表示调用方传入的业务参数。
+    返回：按更新时间倒序排列的阻塞任务列表。
+    """
     items = db.scalars(
         select(Task)
         .options(joinedload(Task.project), joinedload(Task.assignee))
@@ -100,6 +135,11 @@ def pending_tasks(
     _: Actor = Depends(require_actor),
     limit: int = Query(10, ge=1, le=50),
 ) -> DashboardTasks:
+    """查询待提交任务列表。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`_` 表示依赖注入占位参数，用于触发登录或权限校验；`limit` 表示调用方传入的业务参数。
+    返回：TODO 和 IN_PROGRESS 状态的任务列表。
+    """
     items = db.scalars(
         select(Task)
         .options(joinedload(Task.project), joinedload(Task.assignee))
@@ -116,5 +156,10 @@ def recent_audit_logs(
     _: Actor = Depends(require_actor),
     limit: int = Query(10, ge=1, le=50),
 ) -> RecentAuditLogs:
+    """查询最近审计日志，供 Dashboard 展示项目动态。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`_` 表示依赖注入占位参数，用于触发登录或权限校验；`limit` 表示调用方传入的业务参数。
+    返回：按创建时间倒序排列的审计日志列表。
+    """
     items = db.scalars(select(AuditLog).order_by(AuditLog.created_at.desc(), AuditLog.id.desc()).limit(limit)).all()
     return RecentAuditLogs(items=items, total=len(items))

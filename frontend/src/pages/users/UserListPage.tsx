@@ -1,3 +1,8 @@
+/**
+ * 用户账号列表页面模块，展示账号目录和角色分配入口。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -11,6 +16,11 @@ import { Card, CardContent, CardHeader } from "../../components/ui/Card";
 import { formatDateTime } from "../../lib/format";
 import { useAuth } from "../../state/auth";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function UserListPage() {
   const { isAdmin } = useAuth();
   const users = useQuery({ queryKey: ["users"], queryFn: () => getUsers({ pageSize: 100 }), enabled: isAdmin });
@@ -74,6 +84,11 @@ export function UserListPage() {
   );
 }
 
+/**
+ * 业务意义：根据业务状态渲染中文状态徽标。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function UserStatusBadge({ status }: { status: string }) {
   if (status === "ACTIVE") {
     return <Badge tone="green">启用</Badge>;

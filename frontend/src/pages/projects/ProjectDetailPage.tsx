@@ -1,3 +1,8 @@
+/**
+ * 项目详情页面模块，展示项目概况、项目人员、任务和需求池。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, Edit, Lightbulb, Plus, Trash2, UserMinus, UserPlus } from "lucide-react";
 import { FormEvent, ReactNode, useMemo, useState } from "react";
@@ -29,6 +34,11 @@ import { useAuth, useMenuPerm } from "../../state/auth";
 import type { ProjectMember, Requirement, User } from "../../types";
 import { errorMessage } from "../../api/http";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function ProjectDetailPage() {
   const { id } = useParams();
   const projectId = id!;
@@ -72,9 +82,16 @@ export function ProjectDetailPage() {
     () => projectMembers.data?.items.filter((item) => item.status === "ACTIVE") ?? [],
     [projectMembers.data?.items]
   );
+  // 普通用户是否能写需求取决于“账号是否绑定为当前项目的启用项目人员”。
   const isAssignedToProject = Boolean(user && activeProjectMembers.some((item) => item.member?.userId === user.id));
+  // 新增需求需要同时满足项目分配和菜单权限；ADMIN 保留全局写权限。
   const canCreateRequirement = isAdmin || (isAssignedToProject && requirementPerm.has("requirement:create"));
 
+  /**
+   * 业务意义：刷新项目详情页涉及的项目、人员、需求、任务和看板缓存。
+   * 参数：无。
+   * 返回：无返回值，通过 TanStack Query 缓存失效触发数据重新加载。
+   */
   const invalidateProjectSurface = async () => {
     await queryClient.invalidateQueries({ queryKey: ["project", projectId] });
     await queryClient.invalidateQueries({ queryKey: ["project-members", projectId] });
@@ -132,6 +149,11 @@ export function ProjectDetailPage() {
     deleteRequirementMutation.error ??
     claimRequirementMutation.error;
 
+  /**
+   * 业务意义：提交项目进度更新表单。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleProgress(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -141,12 +163,22 @@ export function ProjectDetailPage() {
     });
   }
 
+  /**
+   * 业务意义：提交项目状态更新表单。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleStatus(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     statusMutation.mutate({ status: String(form.get("status")), description: String(form.get("description") ?? "") });
   }
 
+  /**
+   * 业务意义：把选中的项目人员分配到当前项目。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleAssignMember(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -158,6 +190,11 @@ export function ProjectDetailPage() {
     event.currentTarget.reset();
   }
 
+  /**
+   * 业务意义：在当前项目需求池创建需求。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleCreateRequirement(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -170,6 +207,11 @@ export function ProjectDetailPage() {
     event.currentTarget.reset();
   }
 
+  /**
+   * 业务意义：保存需求池中某条需求的编辑结果。
+   * 参数：`event` 表示调用方传入的业务参数；`requirement` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleUpdateRequirement(event: FormEvent<HTMLFormElement>, requirement: Requirement) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -182,10 +224,16 @@ export function ProjectDetailPage() {
     });
   }
 
+  /**
+   * 业务意义：判断当前登录用户是否可以执行指定业务操作。
+   * 参数：`requirement` 表示调用方传入的业务参数。
+   * 返回：返回布尔值，用于控制页面操作权限、展开状态或路由激活状态。
+   */
   function canEditRequirement(requirement: Requirement) {
     if (isAdmin) {
       return true;
     }
+    // CONTRIBUTOR 只能编辑自己创建、仍未认领、且属于已分配项目的需求。
     return Boolean(
       user &&
         isAssignedToProject &&
@@ -196,10 +244,16 @@ export function ProjectDetailPage() {
     );
   }
 
+  /**
+   * 业务意义：判断当前登录用户是否可以执行指定业务操作。
+   * 参数：`requirement` 表示调用方传入的业务参数。
+   * 返回：返回布尔值，用于控制页面操作权限、展开状态或路由激活状态。
+   */
   function canDeleteRequirement(requirement: Requirement) {
     if (isAdmin) {
       return true;
     }
+    // 删除权限与编辑权限保持一致，避免需求被认领后仍被创建人移除。
     return Boolean(
       user &&
         isAssignedToProject &&
@@ -210,13 +264,24 @@ export function ProjectDetailPage() {
     );
   }
 
+  /**
+   * 业务意义：判断当前登录用户是否可以执行指定业务操作。
+   * 参数：`requirement` 表示调用方传入的业务参数。
+   * 返回：返回布尔值，用于控制页面操作权限、展开状态或路由激活状态。
+   */
   function canClaimRequirement(requirement: Requirement) {
     if (requirement.status !== "OPEN" || requirement.claimedByUserId) {
       return false;
     }
+    // 认领不要求创建人，但要求仍是项目成员并具备认领权限。
     return isAdmin || (isAssignedToProject && requirementPerm.has("requirement:claim"));
   }
 
+  /**
+   * 业务意义：把业务 id 或对象转换为页面展示文本。
+   * 参数：`userId?` 表示调用方传入的业务参数。
+   * 返回：返回格式化后的展示文本、字段值或可提交数据。
+   */
   function displayUserName(userId?: number | null) {
     if (!userId) {
       return "未指定";
@@ -454,6 +519,11 @@ export function ProjectDetailPage() {
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="detail-item">
@@ -463,6 +533,11 @@ function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function ProjectMemberItem({
   assignment,
   displayName,
@@ -489,6 +564,11 @@ function ProjectMemberItem({
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function RequirementItem({
   requirement,
   creatorName,

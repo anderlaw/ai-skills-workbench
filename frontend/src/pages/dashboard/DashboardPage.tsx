@@ -1,3 +1,8 @@
+/**
+ * 统计看板页面模块，展示项目、项目人员、任务、需求和近期动态。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { Activity, Clock, FolderKanban, Lightbulb, Users } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { ReactNode } from "react";
@@ -16,6 +21,11 @@ import { Card, CardContent, CardHeader } from "../../components/ui/Card";
 import { formatDateTime } from "../../lib/format";
 import type { AuditLog } from "../../types";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function DashboardPage() {
   const summary = useQuery({ queryKey: ["dashboard", "summary"], queryFn: getDashboardSummary });
   const recentProjects = useQuery({ queryKey: ["dashboard", "recent-projects"], queryFn: getRecentProjects });
@@ -78,6 +88,11 @@ export function DashboardPage() {
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function ResourceCard({
   title,
   value,
@@ -114,6 +129,11 @@ function ResourceCard({
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function ActivityItem({ log }: { log: AuditLog }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
@@ -130,6 +150,11 @@ function ActivityItem({ log }: { log: AuditLog }) {
   );
 }
 
+/**
+ * 业务意义：把审计或业务动作转换为中文描述。
+ * 参数：`log` 表示调用方传入的业务参数。
+ * 返回：返回格式化后的展示文本、字段值或可提交数据。
+ */
 function describeActivity(log: AuditLog) {
   const target = `${targetTypeLabel(log.targetType)} #${log.targetId ?? "-"}`;
   if (log.description) {
@@ -138,6 +163,11 @@ function describeActivity(log: AuditLog) {
   return `${log.actorName} ${actionLabel(log.action)} ${target}`;
 }
 
+/**
+ * 业务意义：把审计目标类型转换为 Dashboard 动态里的中文名称。
+ * 参数：`targetType` 表示调用方传入的业务参数。
+ * 返回：返回格式化后的展示文本、字段值或可提交数据。
+ */
 function targetTypeLabel(targetType: string) {
   const labels: Record<string, string> = {
     PROJECT: "项目",
@@ -152,6 +182,11 @@ function targetTypeLabel(targetType: string) {
   return labels[targetType] ?? targetType;
 }
 
+/**
+ * 业务意义：把审计动作类型转换为 Dashboard 动态里的中文动词。
+ * 参数：`action` 表示调用方传入的业务参数。
+ * 返回：返回格式化后的展示文本、字段值或可提交数据。
+ */
 function actionLabel(action: string) {
   const labels: Record<string, string> = {
     CREATE: "创建了",

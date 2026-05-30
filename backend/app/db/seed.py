@@ -1,3 +1,8 @@
+"""初始化管理员、角色、权限树和默认授权数据。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -87,6 +92,11 @@ CONTRIBUTOR_PERMISSION_CODES = {
 
 
 def seed_defaults(db: Session) -> None:
+    """初始化系统内置角色、管理员账号、权限树和默认授权。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据。
+    返回：无返回值；重复执行时会更新内置节点而不是重复插入。
+    """
     settings = get_settings()
     admin_role = get_or_create_role(db, "ADMIN", "管理员")
     contributor_role = get_or_create_role(db, "CONTRIBUTOR", "贡献者")
@@ -114,6 +124,7 @@ def seed_defaults(db: Session) -> None:
             parent_code = item.get("parent_code")
             if parent_code:
                 parent_id = code_to_node[parent_code].id
+            # 内置权限树使用 code 查找父节点，保持逻辑外键 parent_id 的可重复初始化能力。
             node = PermissionNode(
                 parent_id=parent_id,
                 node_type=item["node_type"],
@@ -129,6 +140,7 @@ def seed_defaults(db: Session) -> None:
             db.flush()
         else:
             parent_code = item.get("parent_code")
+            # 已存在节点按内置配置刷新，保证菜单名称、路由和排序随版本升级自动收敛。
             node.parent_id = code_to_node[parent_code].id if parent_code else None
             node.node_type = item["node_type"]
             node.name = item["name"]
@@ -149,6 +161,11 @@ def seed_defaults(db: Session) -> None:
 
 
 def get_or_create_role(db: Session, code: str, name: str) -> Role:
+    """按 code 查询角色，不存在时创建启用角色。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`code` 表示调用方传入的业务参数；`name` 表示调用方传入的业务参数。
+    返回：已存在或新创建的角色 ORM 对象。
+    """
     role = db.scalar(select(Role).where(Role.code == code))
     if role is None:
         role = Role(code=code, name=name, status="ACTIVE")
@@ -158,12 +175,22 @@ def get_or_create_role(db: Session, code: str, name: str) -> Role:
 
 
 def ensure_user_role(db: Session, user_id: int, role_id: int) -> None:
+    """确保用户拥有指定角色。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`user_id` 表示调用方传入的业务参数；`role_id` 表示调用方传入的业务参数。
+    返回：无返回值；关系不存在时新增，多次执行保持幂等。
+    """
     exists = db.scalar(select(UserRole).where(UserRole.user_id == user_id, UserRole.role_id == role_id))
     if exists is None:
         db.add(UserRole(user_id=user_id, role_id=role_id))
 
 
 def ensure_role_permission(db: Session, role_id: int, permission_node_id: int) -> None:
+    """确保角色被授予指定权限节点。
+
+    参数：`db` 表示数据库会话，用于查询和提交业务数据；`role_id` 表示调用方传入的业务参数；`permission_node_id` 表示调用方传入的业务参数。
+    返回：无返回值；关系不存在时新增，多次执行保持幂等。
+    """
     exists = db.scalar(
         select(RolePermissionNode).where(
             RolePermissionNode.role_id == role_id,

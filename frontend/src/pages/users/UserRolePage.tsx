@@ -1,3 +1,8 @@
+/**
+ * 用户角色分配页面模块，负责给账号勾选角色。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Save } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -12,6 +17,11 @@ import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../../components/ui/Card";
 import { useAuth } from "../../state/auth";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function UserRolePage() {
   const { id } = useParams();
   const { isAdmin } = useAuth();
@@ -40,6 +50,11 @@ export function UserRolePage() {
     return <PageHeader title="无权访问" description="用户角色分配仅管理员可用。" />;
   }
 
+  /**
+   * 业务意义：切换用户角色勾选状态。
+   * 参数：`code` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function toggleRole(code: string) {
     setCheckedRoleCodes((current) => {
       const next = new Set(current);

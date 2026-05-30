@@ -1,3 +1,8 @@
+"""权限节点 ORM 模型模块，保存目录、菜单和权限项树。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from sqlalchemy import BigInteger, String
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -6,6 +11,10 @@ from app.models.base import IdMixin, TimestampMixin
 
 
 class PermissionNode(IdMixin, TimestampMixin, Base):
+    """PermissionNode ORM 模型，映射业务数据库表并描述字段含义。
+
+    业务意义：承载 `PermissionNode` 相关的数据边界或能力，供系统其他模块复用。
+    """
     __tablename__ = "permission_nodes"
 
     parent_id: Mapped[int | None] = mapped_column(BigInteger, index=True)

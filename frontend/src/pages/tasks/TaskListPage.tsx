@@ -1,3 +1,8 @@
+/**
+ * 任务列表页面模块，展示任务目录和状态。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -12,6 +17,11 @@ import { Card, CardContent, CardHeader } from "../../components/ui/Card";
 import { taskTypeLabels } from "../../lib/constants";
 import { useAuth } from "../../state/auth";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function TaskListPage() {
   const { isAdmin } = useAuth();
   const tasks = useQuery({ queryKey: ["tasks"], queryFn: () => getTasks({ pageSize: 100 }) });

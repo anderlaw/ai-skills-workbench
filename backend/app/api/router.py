@@ -1,3 +1,8 @@
+"""汇总并挂载所有 v1 API 路由，定义后端接口入口。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from fastapi import APIRouter
 
 from app.api.routes import audit_logs, auth, dashboard, members, permission_nodes, projects, requirements, roles, tasks, users

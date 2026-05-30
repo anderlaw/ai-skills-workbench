@@ -1,3 +1,8 @@
+/**
+ * 前端类型定义模块，描述 API 响应、业务实体和枚举类型。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 export type ProjectStatus =
   | "PLANNING"
   | "DEVELOPING"

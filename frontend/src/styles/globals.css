@@ -1,3 +1,7 @@
+/*
+ * 全局样式模块，定义后台管理界面的主题变量、基础排版和复用工具类。
+ * 这些类支撑表格、详情字段、列表项等业务页面的统一视觉层次。
+ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

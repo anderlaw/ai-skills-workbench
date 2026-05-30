@@ -1,3 +1,8 @@
+/**
+ * 任务详情页面模块，展示任务负责人、进度、状态和提交信息。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit } from "lucide-react";
 import { FormEvent } from "react";
@@ -14,12 +19,22 @@ import { taskStatusOptions, taskTypeLabels } from "../../lib/constants";
 import { formatDateTime } from "../../lib/format";
 import { useAuth } from "../../state/auth";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function TaskDetailPage() {
   const { id } = useParams();
   const taskId = id!;
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
   const task = useQuery({ queryKey: ["task", taskId], queryFn: () => getTask(taskId) });
+  /**
+   * 业务意义：刷新任务详情、任务列表和看板缓存。
+   * 参数：无。
+   * 返回：无返回值，通过 TanStack Query 缓存失效触发数据重新加载。
+   */
   const invalidate = async () => {
     await queryClient.invalidateQueries({ queryKey: ["task", taskId] });
     await queryClient.invalidateQueries({ queryKey: ["tasks"] });
@@ -29,18 +44,33 @@ export function TaskDetailPage() {
   const statusMutation = useMutation({ mutationFn: (payload: { status: string; description?: string }) => updateTaskStatus(taskId, payload), onSuccess: invalidate });
   const submitMutation = useMutation({ mutationFn: (payload: { prUrl?: string; submissionNote?: string }) => submitTask(taskId, payload), onSuccess: invalidate });
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleProgress(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     progressMutation.mutate({ progress: Number(form.get("progress")), currentIssues: String(form.get("currentIssues") ?? "") });
   }
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleStatus(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     statusMutation.mutate({ status: String(form.get("status")), description: String(form.get("description") ?? "") });
   }
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleSubmitTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);

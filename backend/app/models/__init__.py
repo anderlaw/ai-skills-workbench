@@ -1,3 +1,8 @@
+"""__init__ ORM 模型模块，负责对应业务表结构描述。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from app.models.audit_log import AuditLog
 from app.models.member import Member
 from app.models.permission_node import PermissionNode

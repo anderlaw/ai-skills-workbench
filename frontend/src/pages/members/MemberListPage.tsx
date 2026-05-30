@@ -1,3 +1,8 @@
+/**
+ * 项目人员列表页面模块，展示项目参与人员目录。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { Plus } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -10,6 +15,11 @@ import { Button } from "../../components/ui/Button";
 import { Card, CardContent, CardHeader } from "../../components/ui/Card";
 import { useAuth } from "../../state/auth";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function MemberListPage() {
   const { isAdmin } = useAuth();
   const members = useQuery({ queryKey: ["members"], queryFn: () => getMembers({ pageSize: 100 }) });

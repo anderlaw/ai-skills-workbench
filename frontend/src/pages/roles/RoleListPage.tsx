@@ -1,3 +1,8 @@
+/**
+ * 角色管理页面模块，负责角色 CRUD、权限树授权和权限节点维护。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
@@ -41,6 +46,11 @@ type NodePanelState =
   | { mode: "create"; parent?: PermissionNode | null }
   | { mode: "edit"; node: PermissionNode };
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function RoleListPage() {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
@@ -165,12 +175,18 @@ export function RoleListPage() {
     return <PageHeader title="无权访问" description="角色管理仅管理员可用。" />;
   }
 
+  /**
+   * 业务意义：切换角色授权树中某个节点的勾选状态。
+   * 参数：`node` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function toggleNode(node: PermissionNode) {
     if (node.status !== "ACTIVE" || selectedRole?.code === "ADMIN") {
       return;
     }
     setCheckedIds((current) => {
       const next = new Set(current);
+      // 勾选父节点会级联勾选所有启用子节点，取消父节点则级联取消。
       const relatedIds = [node.id, ...collectDescendantIds(node)].filter((id) => activeNodeIds.has(id));
       const shouldCheck = !next.has(node.id);
       relatedIds.forEach((id) => {
@@ -181,6 +197,7 @@ export function RoleListPage() {
         }
       });
       if (shouldCheck) {
+        // 勾选子节点时自动带上启用父节点，保证后端返回菜单树时路径完整。
         collectAncestorIds(node.id, parentById)
           .filter((id) => activeNodeIds.has(id))
           .forEach((id) => next.add(id));
@@ -189,6 +206,11 @@ export function RoleListPage() {
     });
   }
 
+  /**
+   * 业务意义：展开或收起权限树中的单个节点。
+   * 参数：`nodeId` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function toggleExpanded(nodeId: number) {
     setExpandedIds((current) => {
       const next = new Set(current);
@@ -201,14 +223,29 @@ export function RoleListPage() {
     });
   }
 
+  /**
+   * 业务意义：展开权限树中的所有可展开节点。
+   * 参数：无。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function expandAll() {
     setExpandedIds(new Set(flatNodes.filter((node) => node.children?.length).map((node) => node.id)));
   }
 
+  /**
+   * 业务意义：收起权限树中的所有节点。
+   * 参数：无。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function collapseAll() {
     setExpandedIds(new Set());
   }
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`role` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleDeleteRole(role: Role) {
     if (role.code === "ADMIN") {
       return;
@@ -218,6 +255,11 @@ export function RoleListPage() {
     }
   }
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`node` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleDeleteNode(node: PermissionNode) {
     if (node.status !== "ACTIVE") {
       return;
@@ -386,6 +428,11 @@ export function RoleListPage() {
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function RoleCard({
   role,
   selected,
@@ -441,6 +488,11 @@ function RoleCard({
   );
 }
 
+/**
+ * 业务意义：渲染角色管理页的错误提示。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function PermissionNodeTreeRow({
   node,
   checkedIds,
@@ -576,6 +628,11 @@ function PermissionNodeTreeRow({
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function RoleEditorPanel({
   panel,
   pending,
@@ -591,6 +648,11 @@ function RoleEditorPanel({
 }) {
   const role = panel.mode === "edit" ? panel.role : null;
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -639,6 +701,11 @@ function RoleEditorPanel({
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function PermissionNodeEditorPanel({
   panel,
   nodes,
@@ -664,6 +731,11 @@ function PermissionNodeEditorPanel({
     ({ node }) => node.nodeType !== "PERMISSION" && node.status === "ACTIVE" && !excludedIds.has(node.id)
   );
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -767,6 +839,11 @@ function PermissionNodeEditorPanel({
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function SidePanel({
   title,
   description,
@@ -803,6 +880,11 @@ function SidePanel({
   );
 }
 
+/**
+ * 业务意义：渲染角色管理页的错误提示。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function ErrorBox({ error }: { error: unknown }) {
   return (
     <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
@@ -811,6 +893,11 @@ function ErrorBox({ error }: { error: unknown }) {
   );
 }
 
+/**
+ * 业务意义：根据业务状态渲染中文状态徽标。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function RoleStatusBadge({ status }: { status: string }) {
   if (status === "ACTIVE") {
     return <Badge tone="green">启用</Badge>;
@@ -821,6 +908,11 @@ function RoleStatusBadge({ status }: { status: string }) {
   return <Badge>{status}</Badge>;
 }
 
+/**
+ * 业务意义：根据业务状态渲染中文状态徽标。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function PermissionNodeTypeBadge({ type }: { type: PermissionNode["nodeType"] }) {
   if (type === "DIRECTORY") {
     return <Badge tone="slate">目录</Badge>;
@@ -831,28 +923,54 @@ function PermissionNodeTypeBadge({ type }: { type: PermissionNode["nodeType"] })
   return <Badge tone="blue">权限项</Badge>;
 }
 
+/**
+ * 业务意义：把树形结构展开为线性列表。
+ * 参数：`nodes` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function flattenNodes(nodes: PermissionNode[]): PermissionNode[] {
   return nodes.flatMap((node) => [node, ...flattenNodes(node.children ?? [])]);
 }
 
+/**
+ * 业务意义：把树形结构展开为线性列表。
+ * 参数：`nodes` 表示调用方传入的业务参数；`depth` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function flattenNodesWithDepth(nodes: PermissionNode[], depth = 0): Array<{ node: PermissionNode; depth: number }> {
   return nodes.flatMap((node) => [{ node, depth }, ...flattenNodesWithDepth(node.children ?? [], depth + 1)]);
 }
 
+/**
+ * 业务意义：从树形或关联结构收集所需 id 集合。
+ * 参数：`node` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function collectDescendantIds(node: PermissionNode): number[] {
   return (node.children ?? []).flatMap((child) => [child.id, ...collectDescendantIds(child)]);
 }
 
+/**
+ * 业务意义：从树形或关联结构收集所需 id 集合。
+ * 参数：`nodeId` 表示调用方传入的业务参数；`parentById` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function collectAncestorIds(nodeId: number, parentById: Map<number, number | null>): number[] {
   const ids: number[] = [];
   let parentId = parentById.get(nodeId);
   while (parentId) {
+    // 从当前节点向上收集父节点，用于勾选子权限时补齐菜单链路。
     ids.push(parentId);
     parentId = parentById.get(parentId);
   }
   return ids;
 }
 
+/**
+ * 业务意义：规范化表单字段值，便于提交给后端。
+ * 参数：`value` 表示调用方传入的业务参数。
+ * 返回：返回格式化后的展示文本、字段值或可提交数据。
+ */
 function normalizeOptionalString(value: FormDataEntryValue | null): string | null {
   const text = String(value ?? "").trim();
   return text ? text : null;

@@ -1,3 +1,8 @@
+"""集中导入所有 ORM 模型，供 SQLAlchemy metadata 和 Alembic 识别表结构。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from app.db.base_class import Base
 
 

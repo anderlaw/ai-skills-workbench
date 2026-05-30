@@ -1,3 +1,8 @@
+"""任务 ORM 模型模块，保存项目任务、负责人、进度、状态和提交信息。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from datetime import date, datetime
 
 from sqlalchemy import DateTime, String, Text
@@ -8,6 +13,10 @@ from app.models.base import ID_TYPE, IdMixin, TimestampMixin
 
 
 class Task(IdMixin, TimestampMixin, Base):
+    """Task ORM 模型，映射业务数据库表并描述字段含义。
+
+    业务意义：承载 `Task` 相关的数据边界或能力，供系统其他模块复用。
+    """
     __tablename__ = "tasks"
 
     project_id: Mapped[int] = mapped_column(ID_TYPE, nullable=False, index=True)

@@ -1,3 +1,8 @@
+/**
+ * 项目人员详情页面模块，展示绑定账号、参与项目和负责任务。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Edit } from "lucide-react";
 import { FormEvent } from "react";
@@ -16,6 +21,11 @@ import { memberStatusOptions, roleLabels } from "../../lib/constants";
 import { formatDateTime } from "../../lib/format";
 import { useAuth } from "../../state/auth";
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function MemberDetailPage() {
   const { id } = useParams();
   const memberId = id!;
@@ -33,6 +43,11 @@ export function MemberDetailPage() {
     }
   });
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleStatus(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);

@@ -1,3 +1,8 @@
+/**
+ * 前端路由模块，负责登录保护、菜单权限保护和页面路由注册。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import type { ReactNode } from "react";
 
@@ -24,6 +29,11 @@ import { UserListPage } from "./pages/users/UserListPage";
 import { UserRolePage } from "./pages/users/UserRolePage";
 import { useAuth } from "./state/auth";
 
+/**
+ * 业务意义：根据认证状态保护需要登录的页面路由。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function RequireAuth({ children }: { children: ReactNode }) {
   const { loading, user } = useAuth();
   if (loading) {
@@ -39,6 +49,11 @@ function RequireAuth({ children }: { children: ReactNode }) {
   return children;
 }
 
+/**
+ * 业务意义：根据菜单 scope 和权限 code 保护业务页面。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function RequirePermission({ scope, code, children }: { scope: string; code: string; children: ReactNode }) {
   const { hasPermission } = useAuth();
   if (!hasPermission(scope, code)) {
@@ -47,6 +62,11 @@ function RequirePermission({ scope, code, children }: { scope: string; code: str
   return children;
 }
 
+/**
+ * 业务意义：包装路由元素并附加菜单权限校验。
+ * 参数：`scope` 表示调用方传入的业务参数；`code` 表示调用方传入的业务参数；`element` 表示调用方传入的业务参数。
+ * 返回：返回带权限保护的路由元素。
+ */
 function allow(scope: string, code: string, element: ReactNode) {
   return <RequirePermission scope={scope} code={code}>{element}</RequirePermission>;
 }

@@ -1,3 +1,8 @@
+/**
+ * 权限配置页面模块，负责权限树展示和右侧抽屉式节点配置。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clsx } from "clsx";
 import {
@@ -49,6 +54,11 @@ interface TreeStats {
   disabled: number;
 }
 
+/**
+ * 业务意义：渲染业务页面并组织数据查询、权限判断和用户交互。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function PermissionNodePage() {
   const { isAdmin } = useAuth();
   const queryClient = useQueryClient();
@@ -68,6 +78,7 @@ export function PermissionNodePage() {
 
   useEffect(() => {
     if (!treeInitialized && flatNodes.length) {
+      // 初次进入只展开到目录层，让权限树保持可扫读而不是一次铺开全部权限项。
       setExpandedIds(new Set(flatNodes.filter((node) => node.nodeType === "DIRECTORY").map((node) => node.id)));
       setTreeInitialized(true);
     }
@@ -116,11 +127,21 @@ export function PermissionNodePage() {
     return <PageHeader title="无权访问" description="权限配置仅管理员可用。" />;
   }
 
+  /**
+   * 业务意义：打开节点详情抽屉。
+   * 参数：`node` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function openDetail(node: PermissionNode) {
     setSelectedNodeId(node.id);
     setDrawerState({ mode: "detail", node });
   }
 
+  /**
+   * 业务意义：按父节点和节点类型打开新增节点抽屉。
+   * 参数：`parent` 表示调用方传入的业务参数；`nodeType` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function startCreate(parent: PermissionNode | null, nodeType: PermissionNode["nodeType"]) {
     if (parent) {
       setSelectedNodeId(parent.id);
@@ -128,11 +149,21 @@ export function PermissionNodePage() {
     setDrawerState({ mode: "create", parent, nodeType });
   }
 
+  /**
+   * 业务意义：打开节点编辑抽屉。
+   * 参数：`node` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function startEdit(node: PermissionNode) {
     setSelectedNodeId(node.id);
     setDrawerState({ mode: "edit", node });
   }
 
+  /**
+   * 业务意义：确认后软删除权限节点。
+   * 参数：`node` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleDelete(node: PermissionNode) {
     if (node.status !== "ACTIVE") {
       return;
@@ -142,6 +173,11 @@ export function PermissionNodePage() {
     }
   }
 
+  /**
+   * 业务意义：展开或收起权限树中的单个节点。
+   * 参数：`nodeId` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function toggleExpanded(nodeId: number) {
     setExpandedIds((current) => {
       const next = new Set(current);
@@ -154,14 +190,29 @@ export function PermissionNodePage() {
     });
   }
 
+  /**
+   * 业务意义：把权限树展开到菜单层。
+   * 参数：无。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function expandToMenus() {
     setExpandedIds(new Set(flatNodes.filter((node) => node.nodeType === "DIRECTORY").map((node) => node.id)));
   }
 
+  /**
+   * 业务意义：展开权限树中的所有可展开节点。
+   * 参数：无。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function expandAll() {
     setExpandedIds(new Set(flatNodes.filter((node) => node.children?.length).map((node) => node.id)));
   }
 
+  /**
+   * 业务意义：收起权限树中的所有节点。
+   * 参数：无。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function collapseAll() {
     setExpandedIds(new Set());
   }
@@ -278,6 +329,11 @@ export function PermissionNodePage() {
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function NodeDrawer({
   state,
   nodeById,
@@ -378,6 +434,11 @@ function NodeDrawer({
   );
 }
 
+/**
+ * 业务意义：把权限节点类型转换为中文展示名称。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function NodeEditorForm({
   editorState,
   nodeById,
@@ -408,6 +469,11 @@ function NodeEditorForm({
   const showOperationLevel = nodeType === "PERMISSION";
   const showIcon = nodeType !== "PERMISSION";
 
+  /**
+   * 业务意义：处理页面交互事件并触发对应业务动作。
+   * 参数：`event` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -521,6 +587,11 @@ function NodeEditorForm({
   );
 }
 
+/**
+ * 业务意义：递归渲染权限树节点，并提供节点详情、编辑、新增子节点和删除入口。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function PermissionTreeNode({
   node,
   selectedNodeId,
@@ -695,6 +766,11 @@ function PermissionTreeNode({
   );
 }
 
+/**
+ * 业务意义：渲染页面局部业务区块，并承接父组件传入的操作回调。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function SideDrawer({
   title,
   description,
@@ -731,6 +807,11 @@ function SideDrawer({
   );
 }
 
+/**
+ * 业务意义：渲染权限树统计徽标。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function StatPill({ label, value }: { label: string; value: number }) {
   return (
     <span className="rounded-full border border-slate-200 bg-white px-3 py-1">
@@ -739,6 +820,11 @@ function StatPill({ label, value }: { label: string; value: number }) {
   );
 }
 
+/**
+ * 业务意义：渲染抽屉详情中的标签和值。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function InfoLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid grid-cols-[72px_minmax(0,1fr)] gap-3">
@@ -748,6 +834,11 @@ function InfoLine({ label, value }: { label: string; value: string }) {
   );
 }
 
+/**
+ * 业务意义：渲染权限配置页的错误提示。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function ErrorBox({ error, className }: { error: unknown; className?: string }) {
   return (
     <div className={clsx("rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700", className)}>
@@ -756,11 +847,21 @@ function ErrorBox({ error, className }: { error: unknown; className?: string }) 
   );
 }
 
+/**
+ * 业务意义：根据权限节点类型选择对应图标。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function NodeIcon({ nodeType, className }: { nodeType: PermissionNode["nodeType"]; className?: string }) {
   const Icon = nodeType === "PERMISSION" ? ShieldCheck : nodeType === "MENU" ? KeyRound : FolderTree;
   return <Icon size={16} className={className} />;
 }
 
+/**
+ * 业务意义：根据业务状态渲染中文状态徽标。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function NodeTypeBadge({ type }: { type: PermissionNode["nodeType"] }) {
   if (type === "DIRECTORY") {
     return <Badge tone="slate">目录</Badge>;
@@ -771,6 +872,11 @@ function NodeTypeBadge({ type }: { type: PermissionNode["nodeType"] }) {
   return <Badge tone="blue">权限项</Badge>;
 }
 
+/**
+ * 业务意义：根据业务状态渲染中文状态徽标。
+ * 参数：解构 props 参数，包含组件渲染和业务交互所需字段。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 function NodeStatusBadge({ status }: { status: string }) {
   if (status === "ACTIVE") {
     return <Badge tone="green">启用</Badge>;
@@ -781,6 +887,11 @@ function NodeStatusBadge({ status }: { status: string }) {
   return <Badge>{status}</Badge>;
 }
 
+/**
+ * 业务意义：把权限节点类型转换为中文展示名称。
+ * 参数：`type` 表示调用方传入的业务参数。
+ * 返回：返回格式化后的展示文本、字段值或可提交数据。
+ */
 function nodeTypeLabel(type: PermissionNode["nodeType"]) {
   if (type === "DIRECTORY") {
     return "目录";
@@ -791,10 +902,20 @@ function nodeTypeLabel(type: PermissionNode["nodeType"]) {
   return "权限项";
 }
 
+/**
+ * 业务意义：把树形结构展开为线性列表。
+ * 参数：`nodes` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function flattenNodes(nodes: PermissionNode[]): PermissionNode[] {
   return nodes.flatMap((node) => [node, ...flattenNodes(node.children ?? [])]);
 }
 
+/**
+ * 业务意义：统计权限树中目录、菜单、权限项和停用节点数量。
+ * 参数：`nodes` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function getTreeStats(nodes: PermissionNode[]): TreeStats {
   return nodes.reduce(
     (stats, node) => {
@@ -814,6 +935,11 @@ function getTreeStats(nodes: PermissionNode[]): TreeStats {
   );
 }
 
+/**
+ * 业务意义：根据搜索关键字过滤权限树，同时保留命中的祖先节点。
+ * 参数：`nodes` 表示调用方传入的业务参数；`keyword` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function filterTree(nodes: PermissionNode[], keyword: string): PermissionNode[] {
   const query = keyword.trim().toLowerCase();
   if (!query) {
@@ -821,6 +947,7 @@ function filterTree(nodes: PermissionNode[], keyword: string): PermissionNode[] 
   }
   return nodes.flatMap((node) => {
     const children = filterTree(node.children ?? [], keyword);
+    // 子节点命中时保留父节点，确保搜索结果仍然呈现完整层级。
     const selfMatches = [node.name, node.code, node.routePath ?? ""].some((value) => value.toLowerCase().includes(query));
     if (selfMatches || children.length) {
       return [{ ...node, children }];
@@ -829,6 +956,11 @@ function filterTree(nodes: PermissionNode[], keyword: string): PermissionNode[] 
   });
 }
 
+/**
+ * 业务意义：计算权限节点在树中的中文路径。
+ * 参数：`node` 表示调用方传入的业务参数；`nodeById` 表示调用方传入的业务参数。
+ * 返回：返回格式化后的展示文本、字段值或可提交数据。
+ */
 function getNodePath(node: PermissionNode, nodeById: Map<number, PermissionNode>): string {
   const names = [node.name];
   let parentId = node.parentId ?? null;
@@ -843,10 +975,20 @@ function getNodePath(node: PermissionNode, nodeById: Map<number, PermissionNode>
   return names.join(" / ");
 }
 
+/**
+ * 业务意义：统计某个权限节点下的全部后代节点数量。
+ * 参数：`node` 表示调用方传入的业务参数。
+ * 返回：返回数字统计结果，用于页面展示或业务判断。
+ */
 function countDescendants(node: PermissionNode): number {
   return (node.children ?? []).reduce((total, child) => total + 1 + countDescendants(child), 0);
 }
 
+/**
+ * 业务意义：规范化表单字段值，便于提交给后端。
+ * 参数：`value` 表示调用方传入的业务参数。
+ * 返回：返回格式化后的展示文本、字段值或可提交数据。
+ */
 function normalizeOptionalString(value: FormDataEntryValue | null): string | null {
   const text = String(value ?? "").trim();
   return text ? text : null;

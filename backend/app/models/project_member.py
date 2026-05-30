@@ -1,3 +1,8 @@
+"""项目人员关系 ORM 模型模块，保存项目与项目人员的职责和状态。
+
+本模块的注释用于说明业务边界、主要参数和返回结果，便于后续维护。
+"""
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, String, Text, UniqueConstraint
@@ -8,6 +13,10 @@ from app.models.base import ID_TYPE, IdMixin, TimestampMixin
 
 
 class ProjectMember(IdMixin, TimestampMixin, Base):
+    """ProjectMember ORM 模型，映射业务数据库表并描述字段含义。
+
+    业务意义：承载 `ProjectMember` 相关的数据边界或能力，供系统其他模块复用。
+    """
     __tablename__ = "project_members"
     __table_args__ = (UniqueConstraint("project_id", "member_id", name="uq_project_member"),)
 

@@ -1,3 +1,8 @@
+/**
+ * 应用布局模块，负责侧边栏、动态菜单、顶部区域和页面出口。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import {
   BarChart3,
   ChevronDown,
@@ -49,6 +54,11 @@ interface RenderableMenuNode extends CurrentMenuNode {
   children: RenderableMenuNode[];
 }
 
+/**
+ * 业务意义：渲染可复用 UI 组件，统一页面展示和交互体验。
+ * 参数：无。
+ * 返回：返回 React 元素，用于页面或组件渲染。
+ */
 export function AppLayout() {
   const { displayName, isAdmin, logout, menuTree, roles } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -59,6 +69,11 @@ export function AppLayout() {
   const sidebarWidth = sidebarCollapsed ? "w-20" : "w-64";
   const mainOffset = sidebarCollapsed ? "sm:pl-20" : "sm:pl-64";
 
+  /**
+   * 业务意义：渲染可复用 UI 组件，统一页面展示和交互体验。
+   * 参数：`code` 表示调用方传入的业务参数。
+   * 返回：无返回值，主要通过状态更新、请求提交或事件副作用完成处理。
+   */
   function toggle(code: string) {
     setExpanded((value) => {
       const next = new Set(value);
@@ -71,6 +86,11 @@ export function AppLayout() {
     });
   }
 
+  /**
+   * 业务意义：渲染可复用 UI 组件，统一页面展示和交互体验。
+   * 参数：`node` 表示调用方传入的业务参数；`depth` 表示调用方传入的业务参数。
+   * 返回：返回转换后的业务结果或供调用方继续使用的数据。
+   */
   function renderNode(node: RenderableMenuNode, depth = 0) {
     const Icon = getIcon(node.icon);
     const hasChildren = node.children.length > 0;
@@ -215,6 +235,11 @@ export function AppLayout() {
   );
 }
 
+/**
+ * 业务意义：把原始数据转换为页面可渲染结构。
+ * 参数：`nodes` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function buildRenderableMenu(nodes: CurrentMenuNode[]): RenderableMenuNode[] {
   return nodes
     .map((node) => {
@@ -225,10 +250,20 @@ function buildRenderableMenu(nodes: CurrentMenuNode[]): RenderableMenuNode[] {
     .filter((node) => Boolean(node.path) || node.children.length > 0);
 }
 
+/**
+ * 业务意义：把树形结构展开为线性列表。
+ * 参数：`nodes` 表示调用方传入的业务参数。
+ * 返回：返回转换后的树、列表、映射或统计数据，供页面继续渲染。
+ */
 function flattenMenu(nodes: RenderableMenuNode[]): RenderableMenuNode[] {
   return nodes.flatMap((node) => [node, ...flattenMenu(node.children)]);
 }
 
+/**
+ * 业务意义：判断当前业务状态是否匹配页面行为。
+ * 参数：`node` 表示调用方传入的业务参数；`pathname` 表示调用方传入的业务参数。
+ * 返回：返回布尔值，用于控制页面操作权限、展开状态或路由激活状态。
+ */
 function isActiveNode(node: RenderableMenuNode, pathname: string): boolean {
   if (node.path && pathname.startsWith(node.path)) {
     return true;
@@ -236,6 +271,11 @@ function isActiveNode(node: RenderableMenuNode, pathname: string): boolean {
   return node.children.some((child) => isActiveNode(child, pathname));
 }
 
+/**
+ * 业务意义：根据后端菜单图标 code 返回 lucide 图标组件。
+ * 参数：`icon?` 表示调用方传入的业务参数。
+ * 返回：返回可直接渲染的 lucide 图标组件，未知 code 使用默认图标。
+ */
 function getIcon(icon?: string | null) {
   if (!icon) {
     return FolderKanban;

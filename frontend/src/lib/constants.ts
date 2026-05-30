@@ -1,3 +1,8 @@
+/**
+ * 业务常量模块，集中维护状态、优先级、角色等中文展示文案。
+ *
+ * 本模块注释说明业务边界、主要输入输出和维护约束。
+ */
 import type { MemberStatus, ProjectRole, ProjectStatus, RequirementStatus, TaskPriority, TaskStatus, TaskType } from "../types";
 
 export const projectStatusLabels: Record<ProjectStatus, string> = {
