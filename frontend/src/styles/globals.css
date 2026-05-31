@@ -6,37 +6,61 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: 34 24% 94%;
-  --foreground: 263 34% 18%;
-  --muted: 30 14% 91%;
-  --muted-foreground: 263 12% 35%;
-  --border: 28 14% 80%;
-  --primary: 245 76% 59%;
-  --primary-foreground: 0 0% 100%;
-  --surface: 0 0% 100%;
-  --surface-muted: 30 12% 91%;
-  --surface-soft: 248 70% 95%;
-  --line: 30 10% 76%;
-  --line-subtle: 30 10% 84%;
-  --content: 24 11% 28%;
-  --content-strong: 24 10% 12%;
-  --content-muted: 26 8% 38%;
-  --brand: 252 72% 58%;
-  --brand-strong: 255 55% 22%;
-  --brand-muted: 250 70% 93%;
-  --on-brand: 0 0% 100%;
-  --accent: 30 95% 58%;
-  --accent-strong: 24 86% 37%;
-  --accent-muted: 33 88% 91%;
-  --danger: 0 74% 42%;
-  --danger-muted: 0 72% 94%;
-  --danger-line: 0 58% 78%;
-  --info: 239 62% 47%;
-  --info-muted: 239 72% 94%;
-  --info-line: 239 54% 80%;
-}
 
+:root {
+  /* 页面基础 */
+  --background: 42 45% 94%;          /* #F7F3EA 页面底色：暖纸色 */
+  --foreground: 21 20% 14%;          /* #2A211C 主文字：深咖黑 */
+
+  /* 通用弱化色 */
+  --muted: 35 37% 90%;               /* #EFE7DC */
+  --muted-foreground: 28 12% 39%;    /* #6F6257 */
+  --border: 33 33% 83%;              /* #E2D5C5 */
+
+  /* 主按钮 / 当前菜单 */
+  --primary: 23 39% 39%;             /* #8A5A3C 核桃木色 */
+  --primary-foreground: 34 100% 97%; /* #FFF8EF */
+
+  /* 卡片 */
+  --surface: 40 100% 98%;            /* #FFFCF6 卡片暖白 */
+  --surface-muted: 37 45% 90%;       /* #F1E8DA 表头/弱背景 */
+  --surface-soft: 34 58% 92%;        /* #F6EBDD 柔和块背景 */
+
+  /* 线条 */
+  --line: 33 33% 83%;                /* #E2D5C5 */
+  --line-subtle: 34 40% 89%;         /* #EEE4D7 */
+
+  /* 内容文字 */
+  --content: 27 13% 27%;             /* #4F453D */
+  --content-strong: 21 20% 14%;      /* #2A211C */
+  --content-muted: 29 11% 43%;       /* #7A6D61 */
+
+  /* 品牌色 */
+  --brand: 23 39% 39%;               /* #8A5A3C */
+  --brand-strong: 20 39% 26%;        /* #5D3A29 */
+  --brand-muted: 31 49% 88%;         /* #EFE0D0 */
+  --on-brand: 34 100% 97%;           /* #FFF8EF */
+
+  /* 点缀色：只用于新增、提示、少量图标 */
+  --accent: 26 56% 51%;              /* #C97A3D 铜橙 */
+  --accent-strong: 21 51% 37%;       /* #8E4F2E */
+  --accent-muted: 30 61% 89%;        /* #F4E3D2 */
+
+  /* 侧边栏：浅木色，不再粉紫 */
+  --sidebar: 33 34% 89%;             /* #ECE3D8 */
+  --sidebar-muted: 29 30% 84%;       /* #E2D5C9 */
+  --sidebar-line: 30 27% 78%;        /* #D6C7B8 */
+
+  /* 危险状态 */
+  --danger: 8 41% 50%;               /* #B45A4C */
+  --danger-muted: 13 50% 95%;        /* #F8EDEA */
+  --danger-line: 9 52% 80%;          /* #E6B8B0 */
+
+  /* 信息 / 成功状态 */
+  --info: 135 22% 40%;               /* #4F7C5A */
+  --info-muted: 136 30% 93%;         /* #E7F2EA */
+  --info-line: 137 24% 80%;          /* #BFD8C6 */
+}
 * {
   box-sizing: border-box;
 }
@@ -133,6 +157,18 @@ textarea {
     background-color: hsl(var(--accent-muted));
   }
 
+  .bg-sidebar {
+    background-color: hsl(var(--sidebar));
+  }
+
+  .bg-sidebar\/95 {
+    background-color: hsl(var(--sidebar) / 0.95);
+  }
+
+  .bg-sidebar-muted {
+    background-color: hsl(var(--sidebar-muted));
+  }
+
   .bg-danger-muted {
     background-color: hsl(var(--danger-muted));
   }
@@ -217,6 +253,14 @@ textarea {
     border-color: hsl(var(--accent-muted));
   }
 
+  .border-sidebar-muted {
+    border-color: hsl(var(--sidebar-muted));
+  }
+
+  .border-sidebar-line {
+    border-color: hsl(var(--sidebar-line));
+  }
+
   .border-danger-line {
     border-color: hsl(var(--danger-line));
   }
@@ -255,6 +299,10 @@ textarea {
 
   .hover\:bg-accent-muted:hover {
     background-color: hsl(var(--accent-muted));
+  }
+
+  .hover\:bg-sidebar-muted:hover {
+    background-color: hsl(var(--sidebar-muted));
   }
 
   .hover\:bg-danger-muted:hover {

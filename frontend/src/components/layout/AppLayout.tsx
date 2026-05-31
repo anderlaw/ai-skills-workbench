@@ -104,7 +104,7 @@ export function AppLayout() {
             onClick={() => toggle(node.code)}
             className={`flex h-10 w-full items-center justify-between rounded-lg text-sm font-medium transition ${
               sidebarCollapsed && depth === 0 ? "justify-center px-0" : "gap-3 px-3"
-            } ${active ? "bg-brand-muted text-brand" : "text-content hover:bg-accent-muted hover:text-brand"}`}
+            } ${active ? "bg-brand text-on-brand shadow-sm" : "text-content hover:bg-sidebar-muted hover:text-brand-strong"}`}
             title={sidebarCollapsed ? node.name : undefined}
             style={{ paddingLeft: sidebarCollapsed ? undefined : `${12 + depth * 14}px` }}
           >
@@ -132,7 +132,7 @@ export function AppLayout() {
         className={({ isActive }) =>
           `flex h-10 items-center rounded-lg text-sm font-medium transition ${
             sidebarCollapsed && depth === 0 ? "justify-center px-0" : "gap-3 px-3"
-          } ${isActive ? "border border-brand-muted bg-brand-muted text-brand-strong shadow-sm" : "border border-transparent text-content hover:bg-accent-muted hover:text-brand"}`
+          } ${isActive ? "border border-brand bg-brand text-on-brand shadow-sm" : "border border-transparent text-content hover:bg-sidebar-muted hover:text-brand-strong"}`
         }
         style={{ paddingLeft: sidebarCollapsed ? undefined : `${12 + depth * 14}px` }}
       >
@@ -144,8 +144,8 @@ export function AppLayout() {
 
   return (
     <div className="min-h-screen bg-background">
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden ${sidebarWidth} border-r border-accent-muted bg-surface/95 text-foreground shadow-sm transition-all duration-200 sm:block`}>
-        <div className="border-b border-accent-muted px-4 py-5">
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden ${sidebarWidth} border-r border-sidebar-line bg-sidebar/95 text-foreground shadow-sm transition-all duration-200 sm:block`}>
+        <div className="border-b border-sidebar-line px-4 py-5">
           <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between gap-3"}`}>
             <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"}`}>
               {!sidebarCollapsed ? (
@@ -162,7 +162,7 @@ export function AppLayout() {
                 aria-label="收起菜单"
                 title="收起菜单"
                 type="button"
-                className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-content-muted transition hover:bg-accent-muted hover:text-brand"
+                className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-content-muted transition hover:bg-sidebar-muted hover:text-brand-strong"
                 onClick={() => setSidebarCollapsed(true)}
               >
                 <ChevronLeft size={17} />
@@ -174,15 +174,15 @@ export function AppLayout() {
               aria-label="展开菜单"
               title="展开菜单"
               type="button"
-              className="focus-ring mx-auto mt-4 flex h-8 w-8 items-center justify-center rounded-lg text-content-muted transition hover:bg-accent-muted hover:text-brand"
+              className="focus-ring mx-auto mt-4 flex h-8 w-8 items-center justify-center rounded-lg text-content-muted transition hover:bg-sidebar-muted hover:text-brand-strong"
               onClick={() => setSidebarCollapsed(false)}
             >
               <ChevronRight size={17} />
             </button>
           ) : null}
           {!sidebarCollapsed ? (
-            <div className="mt-5 rounded-lg border border-accent-muted bg-accent-muted p-3 text-xs text-content-muted">
-              <div className="flex items-center gap-2 font-medium text-brand">
+            <div className="mt-5 rounded-lg border border-sidebar-line bg-sidebar-muted p-3 text-xs text-content-muted">
+              <div className="flex items-center gap-2 font-medium text-brand-strong">
                 <ShieldCheck size={15} />
                 {isAdmin ? "管理员" : roles.map((role) => role.name).join("、") || "已登录"}
               </div>
