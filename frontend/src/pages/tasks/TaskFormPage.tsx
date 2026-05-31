@@ -155,7 +155,7 @@ export function TaskFormPage() {
           <Field label="提交说明"><Textarea {...form.register("submissionNote")} /></Field>
           <Field label="备注"><Textarea {...form.register("remark")} /></Field>
         </FormSection>
-        <div className="flex justify-end rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex justify-end rounded-lg border border-line bg-surface p-4 shadow-sm">
           <Button type="submit" disabled={mutation.isPending}><Save size={16} />保存</Button>
         </div>
       </form>

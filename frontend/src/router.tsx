@@ -38,7 +38,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
   const { loading, user } = useAuth();
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-100 text-sm text-slate-500">
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground">
         正在加载用户信息...
       </div>
     );

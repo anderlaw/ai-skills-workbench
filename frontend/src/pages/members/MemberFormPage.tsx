@@ -117,7 +117,7 @@ export function MemberFormPage() {
         <FormSection title="备注" description="记录成员背景、协作偏好或其他补充信息。">
           <Field label="备注"><Textarea {...form.register("remark")} /></Field>
         </FormSection>
-        <div className="flex justify-end rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex justify-end rounded-lg border border-line bg-surface p-4 shadow-sm">
           <Button type="submit" disabled={mutation.isPending}><Save size={16} />保存</Button>
         </div>
       </form>

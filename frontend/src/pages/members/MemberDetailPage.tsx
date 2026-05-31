@@ -87,7 +87,7 @@ export function MemberDetailPage() {
             <Card>
               <CardHeader className="font-semibold">修改状态</CardHeader>
               <CardContent>
-                <form className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3" onSubmit={handleStatus}>
+                <form className="grid gap-2 rounded-lg border border-line bg-surface-muted p-3" onSubmit={handleStatus}>
                   <Select name="status" defaultValue={data.status}>
                     {memberStatusOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                   </Select>

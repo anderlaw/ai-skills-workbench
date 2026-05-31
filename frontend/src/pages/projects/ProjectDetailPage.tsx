@@ -332,17 +332,17 @@ export function ProjectDetailPage() {
 
   return (
     <>
-      <section className="mb-5 rounded-lg border border-border bg-white px-5 py-5 shadow-sm">
+      <section className="mb-5 rounded-lg border border-border bg-surface px-5 py-5 shadow-sm">
         <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="break-words text-2xl font-semibold text-slate-950">{data.name}</h1>
+              <h1 className="break-words text-2xl font-semibold text-brand-strong">{data.name}</h1>
               <ProjectStatusBadge status={data.status} />
             </div>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{data.description || "暂无项目描述"}</p>
             <div className="mt-5 grid max-w-3xl gap-2">
               <div className="text-sm">
-                <span className="font-medium text-slate-700">项目进度</span>
+                <span className="font-medium text-content">项目进度</span>
               </div>
               <ProgressBar value={data.progress} />
             </div>
@@ -379,7 +379,7 @@ export function ProjectDetailPage() {
       </section>
 
       {mutationError ? (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <div className="mb-4 rounded-lg border border-danger-line bg-danger-muted px-4 py-3 text-sm font-medium text-danger">
           {errorMessage(mutationError)}
         </div>
       ) : null}
@@ -401,14 +401,14 @@ export function ProjectDetailPage() {
             </CardHeader>
             <CardContent className="grid gap-4">
               {showProgressForm ? (
-                <form className="grid gap-4 rounded-lg border border-teal-100 bg-teal-50/40 p-4" onSubmit={handleProgress}>
+                <form className="grid gap-4 rounded-lg border border-line bg-surface-muted p-4" onSubmit={handleProgress}>
                   <div className="grid gap-3 md:grid-cols-[140px_180px_1fr]">
                     <label className="grid gap-1.5 text-sm">
-                      <span className="font-semibold text-slate-700">进度</span>
+                      <span className="font-semibold text-content">进度</span>
                       <Input name="progress" type="number" min={0} max={100} defaultValue={data.progress} />
                     </label>
                     <label className="grid gap-1.5 text-sm">
-                      <span className="font-semibold text-slate-700">状态</span>
+                      <span className="font-semibold text-content">状态</span>
                       <Select name="status" defaultValue={data.status}>
                         {projectStatusOptions.map(([value, label]) => (
                           <option key={value} value={value}>
@@ -440,7 +440,7 @@ export function ProjectDetailPage() {
                 <StatusBlock title="当前问题" value={data.currentIssues} tone="warning" />
                 <StatusBlock title="下一步计划" value={data.nextSteps} />
               </div>
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2 rounded-lg border border-line bg-surface-muted px-4 py-3 text-xs text-muted-foreground">
                 <span className="inline-flex items-center gap-1.5">
                   <Clock3 size={14} />
                   更新时间：{formatDateTime(data.updatedAt)}
@@ -498,7 +498,7 @@ export function ProjectDetailPage() {
                   </table>
                 </div>
               ) : (
-                <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50/70 p-8 text-center">
+                <div className="rounded-lg border border-dashed border-line bg-surface-muted p-8 text-center">
                   <EmptyState text={taskStatusFilter ? "当前筛选下暂无任务" : "暂无项目任务"} />
                   {isAdmin ? (
                     <Link to={`/tasks/new?projectId=${data.id}`} className="mt-4 inline-flex">
@@ -531,8 +531,8 @@ export function ProjectDetailPage() {
             </CardHeader>
             <CardContent className="grid gap-4">
               {canCreateRequirement && showRequirementForm ? (
-                <form className="grid gap-3 rounded-lg border border-teal-100 bg-teal-50/40 p-4" onSubmit={handleCreateRequirement}>
-                  <div className="flex items-center gap-2 text-sm font-semibold text-teal-800">
+                <form className="grid gap-3 rounded-lg border border-line bg-surface-muted p-4" onSubmit={handleCreateRequirement}>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-accent-strong">
                     <Lightbulb size={16} />
                     新增需求
                   </div>
@@ -595,10 +595,10 @@ export function ProjectDetailPage() {
           <Card>
             <CardHeader className="font-semibold">我的权限</CardHeader>
             <CardContent>
-              <div className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm">
-                <ShieldCheck size={18} className={isAssignedToProject || isAdmin ? "mt-0.5 text-emerald-600" : "mt-0.5 text-slate-400"} />
+              <div className="flex items-start gap-3 rounded-lg border border-line bg-surface-muted p-4 text-sm">
+                <ShieldCheck size={18} className={isAssignedToProject || isAdmin ? "mt-0.5 text-brand" : "mt-0.5 text-content-muted"} />
                 <div>
-                  <div className="font-semibold text-slate-900">
+                  <div className="font-semibold text-content-strong">
                     {isAdmin ? "管理员，拥有全部权限" : isAssignedToProject ? "已分配，可参与需求池" : "未分配，只读查看"}
                   </div>
                   <p className="mt-1 text-muted-foreground">
@@ -620,7 +620,7 @@ export function ProjectDetailPage() {
             </CardHeader>
             <CardContent className="grid gap-3">
               {isAdmin ? (
-                <form className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3" onSubmit={handleAssignMember}>
+                <form className="grid gap-2 rounded-lg border border-line bg-surface-muted p-3" onSubmit={handleAssignMember}>
                   <Select name="memberId" required>
                     <option value="">选择项目人员</option>
                     {allMembers.data?.items.map((item) => (
@@ -689,7 +689,7 @@ export function ProjectDetailPage() {
 function StatusUpdateField({ label, name, defaultValue }: { label: string; name: string; defaultValue: string }) {
   return (
     <label className="grid gap-1.5 text-sm">
-      <span className="font-semibold text-slate-700">{label}</span>
+      <span className="font-semibold text-content">{label}</span>
       <Textarea name={name} defaultValue={defaultValue} />
     </label>
   );
@@ -702,8 +702,8 @@ function StatusUpdateField({ label, name, defaultValue }: { label: string; name:
  */
 function StatusBlock({ title, value, tone = "default" }: { title: string; value?: string | null; tone?: "default" | "warning" }) {
   return (
-    <section className={tone === "warning" ? "rounded-lg border border-amber-100 bg-amber-50/60 p-4" : "muted-panel"}>
-      <h3 className="font-semibold text-slate-900">{title}</h3>
+    <section className={tone === "warning" ? "rounded-lg border border-accent-muted bg-accent-muted p-4" : "muted-panel"}>
+      <h3 className="font-semibold text-content-strong">{title}</h3>
       <p className="mt-2 min-h-12 whitespace-pre-wrap text-sm leading-6 text-muted-foreground">{value || "-"}</p>
     </section>
   );
@@ -743,9 +743,9 @@ function TaskRow({ task }: { task: Task }) {
  */
 function SidebarItem({ label, value }: { label: string; value: ReactNode }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-3">
+    <div className="rounded-lg border border-line bg-surface-muted p-3">
       <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className="mt-1 break-words font-medium text-slate-800">{value}</div>
+      <div className="mt-1 break-words font-medium text-content">{value}</div>
     </div>
   );
 }
@@ -784,7 +784,7 @@ function ProjectMemberItem({
   onRemove: () => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface p-3 text-sm shadow-sm">
       <div className="min-w-0">
         <div className="truncate font-medium">{displayName}</div>
         <div className="mt-1 text-muted-foreground">
@@ -836,7 +836,7 @@ function RequirementItem({
 }) {
   if (editing) {
     return (
-      <form className="grid gap-3 rounded-lg border border-teal-200 bg-white p-4 shadow-sm" onSubmit={onSubmitEdit}>
+      <form className="grid gap-3 rounded-lg border border-line bg-surface p-4 shadow-sm" onSubmit={onSubmitEdit}>
         <div className="grid gap-3 md:grid-cols-[1fr_150px]">
           <Input name="title" defaultValue={requirement.title} required />
           <Select name="priority" defaultValue={requirement.priority}>
@@ -862,11 +862,11 @@ function RequirementItem({
   }
 
   return (
-    <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm shadow-sm">
+    <div className="grid gap-3 rounded-lg border border-line bg-surface p-4 text-sm shadow-sm">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="break-words font-semibold text-slate-900">{requirement.title}</h3>
+            <h3 className="break-words font-semibold text-content-strong">{requirement.title}</h3>
             <RequirementStatusBadge status={requirement.status} />
             <PriorityBadge priority={requirement.priority} />
           </div>
@@ -893,7 +893,7 @@ function RequirementItem({
           ) : null}
         </div>
       </div>
-      <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-xs text-muted-foreground md:grid-cols-3">
+      <div className="grid gap-2 rounded-lg bg-surface-muted p-3 text-xs text-muted-foreground md:grid-cols-3">
         <span>创建人：{creatorName}</span>
         <span>认领人：{requirement.claimedByUserId ? claimedName : "未认领"}</span>
         <span>更新：{formatDateTime(requirement.updatedAt)}</span>

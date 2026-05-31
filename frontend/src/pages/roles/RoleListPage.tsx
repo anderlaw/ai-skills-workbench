@@ -285,7 +285,7 @@ export function RoleListPage() {
       />
 
       {pageError ? (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+        <div className="mb-4 rounded-lg border border-danger-line bg-danger-muted px-4 py-3 text-sm font-medium text-danger">
           {errorMessage(pageError)}
         </div>
       ) : null}
@@ -350,11 +350,11 @@ export function RoleListPage() {
           </CardHeader>
           <CardContent>
             {selectedRole?.code === "ADMIN" ? (
-              <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
+              <div className="mb-4 rounded-lg border border-accent-muted bg-accent-muted px-4 py-3 text-sm font-medium text-accent-strong">
                 ADMIN 角色固定拥有全部权限，不允许在这里修改。
               </div>
             ) : null}
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-line bg-surface-muted px-4 py-3">
               <div className="text-sm text-muted-foreground">
                 权限节点 {permissionTree.data?.total ?? "-"} 个，已选择 {checkedIds.size} 个
               </div>
@@ -453,20 +453,20 @@ function RoleCard({
     <div
       className={clsx(
         "rounded-lg border p-4 transition",
-        selected ? "border-teal-300 bg-teal-50" : "border-slate-200 bg-white hover:bg-slate-50",
+        selected ? "border-brand-muted bg-brand-muted" : "border-line bg-surface hover:bg-surface-muted",
         role.status !== "ACTIVE" && "opacity-75"
       )}
     >
       <button type="button" onClick={onSelect} className="block w-full text-left">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <div className="truncate font-semibold text-slate-900">{role.name}</div>
+            <div className="truncate font-semibold text-content-strong">{role.name}</div>
             <div className="mt-1 truncate text-xs text-muted-foreground">{role.code}</div>
           </div>
           <RoleStatusBadge status={role.status} />
         </div>
         <div className="mt-3 text-sm text-muted-foreground">{role.permissionNodeIds.length} 个权限节点</div>
-        {role.description ? <div className="mt-2 line-clamp-2 text-sm text-slate-600">{role.description}</div> : null}
+        {role.description ? <div className="mt-2 line-clamp-2 text-sm text-content">{role.description}</div> : null}
       </button>
       <div className="mt-4 flex flex-wrap gap-2">
         <Button type="button" variant="secondary" className="h-8 px-2" onClick={onEdit} disabled={fixedAdmin}>
@@ -532,7 +532,7 @@ function PermissionNodeTreeRow({
       <div
         className={clsx(
           "grid min-h-12 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border px-3 py-2 text-sm shadow-sm",
-          inactive ? "border-slate-200 bg-slate-50 text-slate-400" : "border-slate-200 bg-white text-slate-800"
+          inactive ? "border-line bg-surface-muted text-content-muted" : "border-line bg-surface text-content"
         )}
         style={{ marginLeft: depth * 18 }}
       >
@@ -540,7 +540,7 @@ function PermissionNodeTreeRow({
           {hasChildren ? (
             <button
               type="button"
-              className="focus-ring flex h-7 w-7 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100"
+              className="focus-ring flex h-7 w-7 items-center justify-center rounded-md text-content-muted hover:bg-background"
               onClick={() => onToggleExpand(node.id)}
               aria-label={expanded ? "收起节点" : "展开节点"}
             >
@@ -564,7 +564,7 @@ function PermissionNodeTreeRow({
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <Icon size={15} className={inactive ? "text-slate-400" : "text-teal-700"} />
+            <Icon size={15} className={inactive ? "text-content-muted" : "text-accent-strong"} />
             <span className="font-semibold">{node.name}</span>
             <PermissionNodeTypeBadge type={node.nodeType} />
             <RoleStatusBadge status={node.status} />
@@ -856,17 +856,17 @@ function SidePanel({
   onClose: () => void;
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-950/30">
-      <div className="h-full w-full max-w-xl overflow-y-auto border-l border-slate-200 bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 border-b border-slate-200 bg-white px-5 py-4">
+    <div className="fixed inset-0 z-50 flex justify-end bg-brand-strong/30">
+      <div className="h-full w-full max-w-xl overflow-y-auto border-l border-line bg-surface shadow-2xl">
+        <div className="sticky top-0 z-10 border-b border-line bg-surface px-5 py-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-lg font-semibold text-slate-900">{title}</div>
+              <div className="text-lg font-semibold text-content-strong">{title}</div>
               <div className="mt-1 text-sm text-muted-foreground">{description}</div>
             </div>
             <button
               type="button"
-              className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100"
+              className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg text-content-muted hover:bg-background"
               onClick={onClose}
               aria-label="关闭"
             >
@@ -887,7 +887,7 @@ function SidePanel({
  */
 function ErrorBox({ error }: { error: unknown }) {
   return (
-    <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+    <div className="rounded-lg border border-danger-line bg-danger-muted px-4 py-3 text-sm font-medium text-danger">
       {errorMessage(error)}
     </div>
   );

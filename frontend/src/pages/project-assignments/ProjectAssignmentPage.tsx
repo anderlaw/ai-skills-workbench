@@ -93,7 +93,7 @@ export function ProjectAssignmentPage() {
                   type="button"
                   onClick={() => setProjectId(project.id)}
                   className={`rounded-lg border p-4 text-left transition ${
-                    selectedProjectId === project.id ? "border-teal-300 bg-teal-50" : "border-slate-200 bg-white hover:bg-slate-50"
+                    selectedProjectId === project.id ? "border-brand-muted bg-brand-muted" : "border-line bg-surface hover:bg-surface-muted"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
@@ -119,12 +119,12 @@ export function ProjectAssignmentPage() {
           </CardHeader>
           <CardContent className="grid gap-4">
             {assignMutation.error || removeMutation.error ? (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              <div className="rounded-lg border border-danger-line bg-danger-muted px-4 py-3 text-sm font-medium text-danger">
                 {errorMessage(assignMutation.error ?? removeMutation.error)}
               </div>
             ) : null}
             {selectedProjectId ? (
-              <form className="grid gap-3 rounded-lg border border-teal-100 bg-teal-50/40 p-4 md:grid-cols-[1fr_150px_1fr_auto]" onSubmit={handleSubmit}>
+              <form className="grid gap-3 rounded-lg border border-line bg-surface-muted p-4 md:grid-cols-[1fr_150px_1fr_auto]" onSubmit={handleSubmit}>
                 <Select name="memberId" required>
                   <option value="">选择项目人员</option>
                   {members.data?.items.map((member) => <option key={member.id} value={member.id}>{member.name}（{member.user?.username ?? `用户 #${member.userId}`}）</option>)}
@@ -152,7 +152,7 @@ export function ProjectAssignmentPage() {
                 {activeAssignments.map((assignment) => {
                   const assignedMember = assignment.member ?? memberById.get(assignment.memberId);
                   return (
-                    <div key={assignment.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm shadow-sm">
+                    <div key={assignment.id} className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface p-4 text-sm shadow-sm">
                       <div className="min-w-0">
                         <div className="truncate font-semibold">{assignedMember ? `${assignedMember.name}（${assignedMember.user?.username ?? `用户 #${assignedMember.userId}`}）` : `人员 #${assignment.memberId}`}</div>
                         <div className="mt-1 text-muted-foreground">{assignment.responsibility || "未填写职责"}</div>

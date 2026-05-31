@@ -59,7 +59,7 @@ export function UserListPage() {
               {users.data?.items.map((item) => (
                 <tr key={item.id}>
                   <td>
-                    <div className="font-medium text-slate-900">{item.displayName}</div>
+                    <div className="font-medium text-content-strong">{item.displayName}</div>
                     <div className="mt-1 text-xs text-muted-foreground">{item.username}</div>
                   </td>
                   <td>

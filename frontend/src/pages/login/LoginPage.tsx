@@ -5,7 +5,7 @@
  */
 import { FormEvent, useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
-import { FolderKanban, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
 
 import { errorMessage } from "../../api/http";
 import { useAuth } from "../../state/auth";
@@ -54,22 +54,17 @@ export function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-4 py-10">
+    <main className="min-h-screen bg-background px-4 py-10">
       <div className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md items-center">
-        <form onSubmit={handleSubmit} className="w-full rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <form onSubmit={handleSubmit} className="w-full rounded-lg border border-border bg-surface p-6 shadow-sm">
           <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-teal-500 text-slate-950">
-              <FolderKanban size={22} />
-            </div>
-            <div>
-              <h1 className="text-xl font-semibold text-slate-950">搭子工坊</h1>
-              <p className="text-sm text-slate-500">登录后进入项目工作台</p>
-            </div>
+            <img src="/logo.svg" alt="" className="h-12 w-12" />
+            <h1 className="text-xl font-semibold text-brand-strong">搭子工坊</h1>
           </div>
           <div className="grid gap-4">
             <Input name="username" placeholder="用户名" required autoComplete="username" />
             <Input name="password" placeholder="密码" type="password" required autoComplete="current-password" />
-            {error ? <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</div> : null}
+            {error ? <div className="rounded-lg border border-danger-line bg-danger-muted px-3 py-2 text-sm text-danger">{error}</div> : null}
             <Button type="submit" disabled={submitting || loading}>
               <LogIn size={16} />
               {submitting ? "登录中" : "登录"}

@@ -13,7 +13,6 @@ import {
   FolderKanban,
   KeyRound,
   LogOut,
-  Menu,
   ShieldCheck,
   UserPlus,
   Users
@@ -105,7 +104,7 @@ export function AppLayout() {
             onClick={() => toggle(node.code)}
             className={`flex h-10 w-full items-center justify-between rounded-lg text-sm font-medium transition ${
               sidebarCollapsed && depth === 0 ? "justify-center px-0" : "gap-3 px-3"
-            } ${active ? "text-teal-300" : "text-slate-300 hover:bg-white/10 hover:text-white"}`}
+            } ${active ? "bg-brand-muted text-brand" : "text-content hover:bg-accent-muted hover:text-brand"}`}
             title={sidebarCollapsed ? node.name : undefined}
             style={{ paddingLeft: sidebarCollapsed ? undefined : `${12 + depth * 14}px` }}
           >
@@ -133,7 +132,7 @@ export function AppLayout() {
         className={({ isActive }) =>
           `flex h-10 items-center rounded-lg text-sm font-medium transition ${
             sidebarCollapsed && depth === 0 ? "justify-center px-0" : "gap-3 px-3"
-          } ${isActive ? "bg-teal-500 text-slate-950" : "text-slate-300 hover:bg-white/10 hover:text-white"}`
+          } ${isActive ? "border border-brand-muted bg-brand-muted text-brand-strong shadow-sm" : "border border-transparent text-content hover:bg-accent-muted hover:text-brand"}`
         }
         style={{ paddingLeft: sidebarCollapsed ? undefined : `${12 + depth * 14}px` }}
       >
@@ -144,27 +143,26 @@ export function AppLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100">
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden ${sidebarWidth} border-r border-slate-800 bg-slate-950 text-white transition-all duration-200 sm:block`}>
-        <div className="border-b border-white/10 px-4 py-5">
+    <div className="min-h-screen bg-background">
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden ${sidebarWidth} border-r border-accent-muted bg-surface/95 text-foreground shadow-sm transition-all duration-200 sm:block`}>
+        <div className="border-b border-accent-muted px-4 py-5">
           <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "justify-between gap-3"}`}>
             <div className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"}`}>
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-500 text-slate-950">
-                <FolderKanban size={21} />
-              </div>
               {!sidebarCollapsed ? (
-                <div>
-                  <div className="text-base font-semibold">搭子工坊</div>
-                  <div className="text-xs text-slate-400">项目共创工作台</div>
-                </div>
-              ) : null}
+                <>
+                  <img src="/logo.svg" alt="" className="h-10 w-10" />
+                  <span className="text-base font-semibold text-brand-strong">搭子工坊</span>
+                </>
+              ) : (
+                <img src="/logo-mark.svg" alt="搭子工坊" className="h-10 w-10" />
+              )}
             </div>
             {!sidebarCollapsed ? (
               <button
                 aria-label="收起菜单"
                 title="收起菜单"
                 type="button"
-                className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition hover:bg-white/10 hover:text-white"
+                className="focus-ring flex h-8 w-8 items-center justify-center rounded-lg text-content-muted transition hover:bg-accent-muted hover:text-brand"
                 onClick={() => setSidebarCollapsed(true)}
               >
                 <ChevronLeft size={17} />
@@ -176,27 +174,27 @@ export function AppLayout() {
               aria-label="展开菜单"
               title="展开菜单"
               type="button"
-              className="focus-ring mx-auto mt-4 flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 transition hover:bg-white/10 hover:text-white"
+              className="focus-ring mx-auto mt-4 flex h-8 w-8 items-center justify-center rounded-lg text-content-muted transition hover:bg-accent-muted hover:text-brand"
               onClick={() => setSidebarCollapsed(false)}
             >
               <ChevronRight size={17} />
             </button>
           ) : null}
           {!sidebarCollapsed ? (
-            <div className="mt-5 rounded-lg border border-white/10 bg-white/5 p-3 text-xs text-slate-300">
-              <div className="flex items-center gap-2 font-medium text-slate-100">
+            <div className="mt-5 rounded-lg border border-accent-muted bg-accent-muted p-3 text-xs text-content-muted">
+              <div className="flex items-center gap-2 font-medium text-brand">
                 <ShieldCheck size={15} />
                 {isAdmin ? "管理员" : roles.map((role) => role.name).join("、") || "已登录"}
               </div>
-              <div className="mt-1 text-slate-400">{displayName}</div>
+              <div className="mt-1 text-content-muted">{displayName}</div>
             </div>
           ) : null}
         </div>
         <nav className="grid gap-1 p-3">{navTree.map((item) => renderNode(item))}</nav>
       </aside>
-      <header className="sticky top-0 z-20 border-b border-slate-800 bg-slate-950 text-white sm:hidden">
+      <header className="sticky top-0 z-20 border-b border-brand-strong bg-brand-strong text-on-brand sm:hidden">
         <div className="flex h-14 items-center gap-3 px-4">
-          <Menu size={20} />
+          <img src="/logo-mark.svg" alt="" className="h-8 w-8" />
           <span className="font-semibold">搭子工坊</span>
         </div>
         <nav className="flex gap-1 overflow-x-auto px-3 pb-3">
@@ -207,7 +205,7 @@ export function AppLayout() {
                 to={item.path}
                 className={({ isActive }) =>
                   `rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                    isActive ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/10 hover:text-white"
+                    isActive ? "bg-accent text-brand-strong" : "text-on-brand/80 hover:bg-surface/10 hover:text-on-brand"
                   }`
                 }
               >
@@ -218,7 +216,7 @@ export function AppLayout() {
         </nav>
       </header>
       <main className={`min-h-screen transition-all duration-200 ${mainOffset}`}>
-        <div className="sticky top-0 z-10 border-b border-slate-200 bg-slate-100/95 px-4 py-3 backdrop-blur lg:px-7">
+        <div className="sticky top-0 z-10 border-b border-line bg-background/95 px-4 py-3 backdrop-blur lg:px-7">
           <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
             <div className="hidden text-sm text-muted-foreground sm:block">{displayName} 正在使用工作台</div>
             <Button variant="secondary" onClick={logout}>

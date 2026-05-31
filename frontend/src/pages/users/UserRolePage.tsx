@@ -87,13 +87,13 @@ export function UserRolePage() {
         </CardHeader>
         <CardContent className="grid gap-4">
           {mutation.error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            <div className="rounded-lg border border-danger-line bg-danger-muted px-4 py-3 text-sm font-medium text-danger">
               {errorMessage(mutation.error)}
             </div>
           ) : null}
           <div className="grid gap-3 md:grid-cols-2">
             {roles.data?.items.map((role) => (
-              <label key={role.id} className="flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm shadow-sm">
+              <label key={role.id} className="flex items-center justify-between gap-3 rounded-lg border border-line bg-surface p-4 text-sm shadow-sm">
                 <span className="flex items-center gap-3">
                   <input
                     type="checkbox"

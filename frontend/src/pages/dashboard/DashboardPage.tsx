@@ -112,18 +112,18 @@ function ResourceCard({
     <>
       <div className="flex items-center justify-between gap-3">
         <span className="text-sm font-medium text-muted-foreground">{title}</span>
-        <span className="rounded-lg bg-teal-50 p-2 text-teal-700">{icon}</span>
+        <span className="rounded-lg bg-accent-muted p-2 text-accent-strong">{icon}</span>
       </div>
-      <div className="mt-3 text-3xl font-semibold text-slate-900">{value}</div>
+      <div className="mt-3 text-3xl font-semibold text-content-strong">{value}</div>
       <div className="mt-2 text-sm text-muted-foreground">{description}</div>
     </>
   );
 
   if (disabled) {
-    return <div className="rounded-lg border border-border bg-white p-4 opacity-75 shadow-sm">{content}</div>;
+    return <div className="rounded-lg border border-border bg-surface p-4 opacity-75 shadow-sm">{content}</div>;
   }
   return (
-    <Link to={to} className="rounded-lg border border-border bg-white p-4 shadow-sm transition hover:border-teal-200 hover:bg-teal-50/40">
+    <Link to={to} className="rounded-lg border border-border bg-surface p-4 shadow-sm transition hover:border-brand-muted hover:bg-brand-muted/40">
       {content}
     </Link>
   );
@@ -136,13 +136,13 @@ function ResourceCard({
  */
 function ActivityItem({ log }: { log: AuditLog }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm">
+    <div className="rounded-lg border border-line bg-surface p-3 text-sm shadow-sm">
       <div className="flex items-start gap-3">
-        <span className="mt-1 rounded-full bg-teal-50 p-1.5 text-teal-700">
+        <span className="mt-1 rounded-full bg-accent-muted p-1.5 text-accent-strong">
           <Clock size={14} />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="break-words font-medium text-slate-900">{describeActivity(log)}</div>
+          <div className="break-words font-medium text-content-strong">{describeActivity(log)}</div>
           <div className="mt-1 text-xs text-muted-foreground">{formatDateTime(log.createdAt)}</div>
         </div>
       </div>

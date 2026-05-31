@@ -115,19 +115,19 @@ export function TaskDetailPage() {
             <Card>
               <CardHeader className="font-semibold">快速操作</CardHeader>
               <CardContent className="grid gap-4">
-                <form className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3" onSubmit={handleProgress}>
+                <form className="grid gap-2 rounded-lg border border-line bg-surface-muted p-3" onSubmit={handleProgress}>
                   <Input name="progress" type="number" min={0} max={100} defaultValue={data.progress} />
                   <Textarea name="currentIssues" defaultValue={data.currentIssues ?? ""} />
                   <Button type="submit" disabled={progressMutation.isPending}>更新进度</Button>
                 </form>
-                <form className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3" onSubmit={handleStatus}>
+                <form className="grid gap-2 rounded-lg border border-line bg-surface-muted p-3" onSubmit={handleStatus}>
                   <Select name="status" defaultValue={data.status}>
                     {taskStatusOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
                   </Select>
                   <Input name="description" placeholder="修改说明" />
                   <Button type="submit" variant="secondary" disabled={statusMutation.isPending}>更新状态</Button>
                 </form>
-                <form className="grid gap-2 rounded-lg border border-slate-200 bg-slate-50/80 p-3" onSubmit={handleSubmitTask}>
+                <form className="grid gap-2 rounded-lg border border-line bg-surface-muted p-3" onSubmit={handleSubmitTask}>
                   <Input name="prUrl" placeholder="PR 地址" defaultValue={data.prUrl ?? ""} />
                   <Textarea name="submissionNote" placeholder="提交说明" defaultValue={data.submissionNote ?? ""} />
                   <Button type="submit" variant="secondary" disabled={submitMutation.isPending}>提交任务结果</Button>

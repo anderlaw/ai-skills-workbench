@@ -15,9 +15,9 @@ import type { InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTML
 export function Field({ label, children, error }: { label: string; children: ReactNode; error?: string }) {
   return (
     <label className="grid gap-1.5 text-sm">
-      <span className="font-semibold text-slate-700">{label}</span>
+      <span className="font-semibold text-content">{label}</span>
       {children}
-      {error ? <span className="text-xs text-red-600">{error}</span> : null}
+      {error ? <span className="text-xs text-danger">{error}</span> : null}
     </label>
   );
 }
@@ -28,7 +28,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
       {...props}
       ref={ref}
       className={clsx(
-        "focus-ring h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-foreground shadow-sm transition placeholder:text-slate-400 hover:border-slate-300",
+        "focus-ring h-10 rounded-lg border border-line bg-surface px-3 text-sm text-foreground shadow-sm transition placeholder:text-content-muted hover:border-brand-muted",
         props.className
       )}
     />
@@ -44,7 +44,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
       {...props}
       ref={ref}
       className={clsx(
-        "focus-ring min-h-28 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-foreground shadow-sm transition placeholder:text-slate-400 hover:border-slate-300",
+        "focus-ring min-h-28 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-foreground shadow-sm transition placeholder:text-content-muted hover:border-brand-muted",
         props.className
       )}
     />
@@ -57,7 +57,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
       {...props}
       ref={ref}
       className={clsx(
-        "focus-ring h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-foreground shadow-sm transition hover:border-slate-300",
+        "focus-ring h-10 rounded-lg border border-line bg-surface px-3 text-sm text-foreground shadow-sm transition hover:border-brand-muted",
         props.className
       )}
     />

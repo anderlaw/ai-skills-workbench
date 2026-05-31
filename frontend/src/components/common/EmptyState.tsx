@@ -9,5 +9,5 @@
  * 本模块注释说明业务边界、主要输入输出和维护约束。
  */
 export function EmptyState({ text = "暂无数据" }: { text?: string }) {
-  return <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50/80 p-8 text-center text-sm text-muted-foreground">{text}</div>;
+  return <div className="rounded-lg border border-dashed border-line bg-surface-muted p-8 text-center text-sm text-muted-foreground">{text}</div>;
 }

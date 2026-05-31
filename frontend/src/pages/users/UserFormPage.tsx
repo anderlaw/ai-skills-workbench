@@ -80,16 +80,16 @@ export function UserFormPage() {
 
         <FormSection title="角色" description="用户可同时拥有多个角色，权限取并集。">
           <div className="grid gap-3 md:grid-cols-2">
-            <label className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 p-3 text-sm font-medium">
+            <label className="flex items-center gap-3 rounded-lg border border-line bg-surface-muted p-3 text-sm font-medium">
               <input type="checkbox" value="CONTRIBUTOR" {...form.register("roleCodes")} />
               CONTRIBUTOR
             </label>
-            <label className="flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/80 p-3 text-sm font-medium">
+            <label className="flex items-center gap-3 rounded-lg border border-line bg-surface-muted p-3 text-sm font-medium">
               <input type="checkbox" value="ADMIN" {...form.register("roleCodes")} />
               ADMIN
             </label>
           </div>
-          {form.formState.errors.roleCodes?.message ? <div className="text-sm text-red-600">{form.formState.errors.roleCodes.message}</div> : null}
+          {form.formState.errors.roleCodes?.message ? <div className="text-sm text-danger">{form.formState.errors.roleCodes.message}</div> : null}
         </FormSection>
 
         <FormSection title="人员信息" description="用于项目分配和需求池协作时识别用户。">
@@ -106,9 +106,9 @@ export function UserFormPage() {
           <Field label="备注"><Textarea {...form.register("remark")} /></Field>
         </FormSection>
 
-        {mutation.error ? <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">创建失败，请检查账号是否重复。</div> : null}
+        {mutation.error ? <div className="rounded-lg border border-danger-line bg-danger-muted px-4 py-3 text-sm font-medium text-danger">创建失败，请检查账号是否重复。</div> : null}
 
-        <div className="flex justify-end rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex justify-end rounded-lg border border-line bg-surface p-4 shadow-sm">
           <Button type="submit" disabled={mutation.isPending}><Save size={16} />保存</Button>
         </div>
       </form>

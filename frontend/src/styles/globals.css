@@ -7,13 +7,34 @@
 @tailwind utilities;
 
 :root {
-  --background: 216 32% 96%;
-  --foreground: 222 24% 12%;
-  --muted: 214 28% 93%;
-  --muted-foreground: 215 14% 42%;
-  --border: 214 23% 86%;
-  --primary: 174 72% 29%;
+  --background: 34 24% 94%;
+  --foreground: 263 34% 18%;
+  --muted: 30 14% 91%;
+  --muted-foreground: 263 12% 35%;
+  --border: 28 14% 80%;
+  --primary: 245 76% 59%;
   --primary-foreground: 0 0% 100%;
+  --surface: 0 0% 100%;
+  --surface-muted: 30 12% 91%;
+  --surface-soft: 248 70% 95%;
+  --line: 30 10% 76%;
+  --line-subtle: 30 10% 84%;
+  --content: 24 11% 28%;
+  --content-strong: 24 10% 12%;
+  --content-muted: 26 8% 38%;
+  --brand: 252 72% 58%;
+  --brand-strong: 255 55% 22%;
+  --brand-muted: 250 70% 93%;
+  --on-brand: 0 0% 100%;
+  --accent: 30 95% 58%;
+  --accent-strong: 24 86% 37%;
+  --accent-muted: 33 88% 91%;
+  --danger: 0 74% 42%;
+  --danger-muted: 0 72% 94%;
+  --danger-line: 0 58% 78%;
+  --info: 239 62% 47%;
+  --info-muted: 239 72% 94%;
+  --info-line: 239 54% 80%;
 }
 
 * {
@@ -46,7 +67,215 @@ textarea {
 }
 
 .focus-ring {
-  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  @apply focus-visible:outline-none;
+}
+
+.focus-ring:focus-visible {
+  box-shadow:
+    0 0 0 2px hsl(var(--background)),
+    0 0 0 4px hsl(var(--primary));
+}
+
+@layer utilities {
+  .bg-background {
+    background-color: hsl(var(--background));
+  }
+
+  .bg-background\/95 {
+    background-color: hsl(var(--background) / 0.95);
+  }
+
+  .bg-surface {
+    background-color: hsl(var(--surface));
+  }
+
+  .bg-surface\/95 {
+    background-color: hsl(var(--surface) / 0.95);
+  }
+
+  .bg-surface-muted {
+    background-color: hsl(var(--surface-muted));
+  }
+
+  .bg-surface-soft {
+    background-color: hsl(var(--surface-soft));
+  }
+
+  .bg-brand {
+    background-color: hsl(var(--brand));
+  }
+
+  .bg-brand-strong {
+    background-color: hsl(var(--brand-strong));
+  }
+
+  .bg-brand-strong\/30 {
+    background-color: hsl(var(--brand-strong) / 0.3);
+  }
+
+  .bg-brand-muted {
+    background-color: hsl(var(--brand-muted));
+  }
+
+  .bg-brand-muted\/40 {
+    background-color: hsl(var(--brand-muted) / 0.4);
+  }
+
+  .bg-brand-muted\/50 {
+    background-color: hsl(var(--brand-muted) / 0.5);
+  }
+
+  .bg-accent {
+    background-color: hsl(var(--accent));
+  }
+
+  .bg-accent-muted {
+    background-color: hsl(var(--accent-muted));
+  }
+
+  .bg-danger-muted {
+    background-color: hsl(var(--danger-muted));
+  }
+
+  .bg-info-muted {
+    background-color: hsl(var(--info-muted));
+  }
+
+  .text-foreground {
+    color: hsl(var(--foreground));
+  }
+
+  .text-muted-foreground {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .text-content {
+    color: hsl(var(--content));
+  }
+
+  .text-content-strong {
+    color: hsl(var(--content-strong));
+  }
+
+  .text-content-muted {
+    color: hsl(var(--content-muted));
+  }
+
+  .text-brand {
+    color: hsl(var(--brand));
+  }
+
+  .text-brand-strong {
+    color: hsl(var(--brand-strong));
+  }
+
+  .text-on-brand {
+    color: hsl(var(--on-brand));
+  }
+
+  .text-on-brand\/80 {
+    color: hsl(var(--on-brand) / 0.8);
+  }
+
+  .text-accent-strong {
+    color: hsl(var(--accent-strong));
+  }
+
+  .text-danger {
+    color: hsl(var(--danger));
+  }
+
+  .text-info {
+    color: hsl(var(--info));
+  }
+
+  .border-border {
+    border-color: hsl(var(--border));
+  }
+
+  .border-line {
+    border-color: hsl(var(--line));
+  }
+
+  .border-line-subtle {
+    border-color: hsl(var(--line-subtle));
+  }
+
+  .border-brand {
+    border-color: hsl(var(--brand));
+  }
+
+  .border-brand-strong {
+    border-color: hsl(var(--brand-strong));
+  }
+
+  .border-brand-muted {
+    border-color: hsl(var(--brand-muted));
+  }
+
+  .border-accent-muted {
+    border-color: hsl(var(--accent-muted));
+  }
+
+  .border-danger-line {
+    border-color: hsl(var(--danger-line));
+  }
+
+  .border-info-line {
+    border-color: hsl(var(--info-line));
+  }
+
+  .placeholder\:text-content-muted::placeholder {
+    color: hsl(var(--content-muted));
+  }
+
+  .hover\:bg-background:hover {
+    background-color: hsl(var(--background));
+  }
+
+  .hover\:bg-surface-muted:hover {
+    background-color: hsl(var(--surface-muted));
+  }
+
+  .hover\:bg-surface\/10:hover {
+    background-color: hsl(var(--surface) / 0.1);
+  }
+
+  .hover\:bg-brand-strong:hover {
+    background-color: hsl(var(--brand-strong));
+  }
+
+  .hover\:bg-brand-muted\/40:hover {
+    background-color: hsl(var(--brand-muted) / 0.4);
+  }
+
+  .hover\:bg-brand-muted\/50:hover {
+    background-color: hsl(var(--brand-muted) / 0.5);
+  }
+
+  .hover\:bg-accent-muted:hover {
+    background-color: hsl(var(--accent-muted));
+  }
+
+  .hover\:bg-danger-muted:hover {
+    background-color: hsl(var(--danger-muted));
+  }
+
+  .hover\:text-brand:hover {
+    color: hsl(var(--brand));
+  }
+
+  .hover\:text-brand-strong:hover {
+    color: hsl(var(--brand-strong));
+  }
+
+  .hover\:text-on-brand:hover {
+    color: hsl(var(--on-brand));
+  }
+
+  .hover\:border-brand-muted:hover {
+    border-color: hsl(var(--brand-muted));
+  }
 }
 
 @layer components {
@@ -55,11 +284,14 @@ textarea {
   }
 
   .data-table thead th {
-    @apply bg-slate-50 px-4 py-3 text-xs font-semibold uppercase tracking-normal text-slate-500 first:rounded-l-lg last:rounded-r-lg;
+    background-color: hsl(var(--surface-muted));
+    color: hsl(var(--content-muted));
+    @apply px-4 py-3 text-xs font-semibold uppercase tracking-normal first:rounded-l-lg last:rounded-r-lg;
   }
 
   .data-table tbody td {
-    @apply border-b border-slate-100 px-4 py-3 align-top;
+    border-bottom: 1px solid hsl(var(--line-subtle));
+    @apply px-4 py-3 align-top;
   }
 
   .data-table tbody tr {
@@ -67,11 +299,16 @@ textarea {
   }
 
   .data-table tbody tr:hover {
-    @apply bg-slate-50/80;
+    background-color: hsl(var(--brand-muted) / 0.4);
   }
 
   .surface-link {
-    @apply font-semibold text-teal-700 transition hover:text-teal-900;
+    color: hsl(var(--brand));
+    @apply font-semibold transition;
+  }
+
+  .surface-link:hover {
+    color: hsl(var(--brand-strong));
   }
 
   .detail-grid {
@@ -79,7 +316,9 @@ textarea {
   }
 
   .detail-item {
-    @apply rounded-lg border border-slate-200 bg-slate-50/80 p-3;
+    background-color: hsl(var(--surface-muted));
+    border: 1px solid hsl(var(--line));
+    @apply rounded-lg p-3;
   }
 
   .detail-label {
@@ -87,11 +326,19 @@ textarea {
   }
 
   .detail-value {
-    @apply mt-1 break-words font-medium text-slate-800;
+    color: hsl(var(--content));
+    @apply mt-1 break-words font-medium;
   }
 
   .soft-list-item {
-    @apply rounded-lg border border-slate-200 bg-white p-3 text-sm shadow-sm transition hover:border-teal-200 hover:bg-teal-50/30;
+    background-color: hsl(var(--surface));
+    border: 1px solid hsl(var(--line));
+    @apply rounded-lg p-3 text-sm shadow-sm transition;
+  }
+
+  .soft-list-item:hover {
+    background-color: hsl(var(--brand-muted) / 0.4);
+    border-color: hsl(var(--brand-muted));
   }
 
   .form-grid {
@@ -99,6 +346,8 @@ textarea {
   }
 
   .muted-panel {
-    @apply rounded-lg border border-slate-200 bg-slate-50/80 p-4;
+    background-color: hsl(var(--surface-muted));
+    border: 1px solid hsl(var(--line));
+    @apply rounded-lg p-4;
   }
 }
